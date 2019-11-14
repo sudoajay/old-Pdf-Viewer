@@ -1,0 +1,8 @@
+<resources>
+	<dimen name="layoutDots_height">54dp</dimen>
+	<dimen name="layoutDots_marginBottom">36dp</dimen>
+	<dimen name="btn_next_textSize">28.8sp</dimen>
+	<dimen name="btn_skip_textSize">32.4sp</dimen>
+	<dimen name="welcomeSlide_imageView_size">216dp</dimen>
+	<dimen name="welcomeSlide_textView_marginTop">18dp</dimen>
+</resources>

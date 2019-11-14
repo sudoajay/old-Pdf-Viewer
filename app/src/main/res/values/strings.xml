@@ -1,0 +1,22 @@
+<resources>
+<!--    App Name-->
+    <string name="app_name">Pdf Viewer</string>
+
+<!--     Welcome Screen Button -->
+    <string name="start_text">Start</string>
+    <string name="next_text">Next</string>
+    <string name="skip_text">Skip</string>
+
+<!--    SharedPreference Heading-->
+    <string name="isFirstTimeLaunch">Is First Time Launch</string>
+    <string name="MY_PREFS_NAME">@string/app_name</string>
+
+
+    <!--Slide Information-->
+    <string name="slide_1_title">Duplicate Data</string>
+    <string name="slide_1_desc">Scan And Remove The Duplicate Data</string>
+    <string name="slide_2_title">Background Timer</string>
+    <string name="slide_2_desc">Delete Duplicate Data Automatically</string>
+    <string name="slide_3_title">Storage Stats</string>
+    <string name="slide_3_desc">Storage Analysis &amp; Storage Stats</string>
+</resources>
