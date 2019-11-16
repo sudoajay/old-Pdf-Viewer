@@ -1,13 +1,13 @@
 <resources>
-<!--    App Name-->
+    <!--    App Name-->
     <string name="app_name">Pdf Viewer</string>
 
-<!--     Welcome Screen Button -->
+    <!--     Welcome Screen Button -->
     <string name="start_text">Start</string>
     <string name="next_text">Next</string>
     <string name="skip_text">Skip</string>
 
-<!--    SharedPreference Heading-->
+    <!--    SharedPreference Heading-->
     <string name="isFirstTimeLaunch">Is First Time Launch</string>
     <string name="MY_PREFS_NAME">@string/app_name</string>
 
@@ -19,4 +19,46 @@
     <string name="slide_2_desc">Delete Duplicate Data Automatically</string>
     <string name="slide_3_title">Storage Stats</string>
     <string name="slide_3_desc">Storage Analysis &amp; Storage Stats</string>
+
+    <!--    Bottom Sheet Dialog -->
+    <string name="bottomSheetPermission_internal">Internal Permission</string>
+    <string name="bottomSheetPermission_sdCard">Sd Card Permission </string>
+
+    <string name="file_Size_Text">Data Size - 0 MB</string>
+
+    <!--Sd Card Path SharedPreference-->
+    <string name="sdCardPath">Sd Card Path</string>
+    <string name="stringUri">String URI</string>
+
+    <!--Custom Dialog SD Card Permission-->
+    <string name="SdCardTextView">Select Sd Card</string>
+    <string name="SdCardTextView1">Please Choose Sd Card
+        To Grant Permission for Write or Remove In It....(Root Directory For Sd Card )</string>
+
+    <string name="readMore_button">Read More</string>
+    <string name="continue_Button">Continue</string>
+
+    <!--custom dialog Permission-->
+    <string name="activity_custom_dialog_permission_TextView1">App Permission</string>
+    <string name="activity_custom_dialog_permission_TextView2">In Android 6+ Apps need permission to read your External storage.</string>
+
+    <!--share app-->
+    <string name="share_info">Hey, check This App which helps you to Delete Duplicate and Unnecessary Data from the phone -</string>
+
+    <string name="errorMes">Please Select the Sd Card Root Directory</string>
+
+    <!--    dialog more option-->
+    <string name="option_openFile">Open File</string>
+    <string name="option_viewFolder">View in folder</string>
+    <string name="option_moreInfo">More Information</string>
+
+    <string name="info_NameText">Name : </string>
+    <string name="info_LocationText">Location : </string>
+    <string name="info_SizeText">Size : </string>
+    <string name="info_TypeText">Type : </string>
+    <string name="info_ExtText">Ext : </string>
+    <string name="info_CreatedText">Created : </string>
+    <string name="open_text">Open</string>
+
+
 </resources>

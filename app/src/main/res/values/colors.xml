@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#a82400</color>
+    <color name="colorPrimaryDark">#a82400</color>
+    <color name="colorAccent">#376db6</color>
+
 
 
     <!-- dots inactive colors -->
@@ -33,4 +34,13 @@
     <color name="bg_screen2">#e4a234</color>
     <color name="bg_screen3">#48a74b</color>
 
+    <color name="xml_Dim_Black_Color">#000</color>
+
+    <!--Toast Color Background and text Color-->
+    <color name="toastBackgroundColor">@android:color/black</color>
+    <color name="toastTextColor">#D6D1D1</color>
+
+    <!--Info Layout -->
+    <color name="infoLayout_BackColor">#2546ABEB</color>
+    <color name="tabBackgroundColor">#ffffff</color>
 </resources>

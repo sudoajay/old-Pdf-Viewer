@@ -5,4 +5,6 @@
 	<dimen name="btn_skip_textSize">21.6sp</dimen>
 	<dimen name="welcomeSlide_imageView_size">144dp</dimen>
 	<dimen name="welcomeSlide_textView_marginTop">12dp</dimen>
+	<dimen name="welcomeSlide_textView_textSize">22sp</dimen>
+
 </resources>

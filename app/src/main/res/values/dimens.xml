@@ -7,4 +7,5 @@
     <dimen name="welcomeSlide_textView_marginTop">10dp</dimen>
     <dimen name="welcomeSlide_imageView_size">120dp</dimen>
     <dimen name="welcomeSlide_textView_textSize">20sp</dimen>
+
 </resources>
