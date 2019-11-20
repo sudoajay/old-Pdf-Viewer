@@ -3,13 +3,13 @@
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
     android:id="@+id/fragment_history_menu_bottom"
     android:layout_width="match_parent"
-    android:layout_height="180dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="#ffffff"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <LinearLayout
-        android:id="@+id/bottomSheet_openFile"
+        android:id="@+id/bottomSheet_scanFile"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:clickable="true"
@@ -21,7 +21,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/file_icon"
+            android:src="@drawable/scan_icon"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -30,12 +30,12 @@
             android:layout_gravity="center"
             android:layout_marginStart="16dp"
             android:fontFamily="@font/lato"
-            android:text="@string/option_openFile"
+            android:text="@string/option_scanFile"
             android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/bottomSheet_viewFolder"
+        android:id="@+id/bottomSheet_selectFile"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:clickable="true"
@@ -47,7 +47,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/folder_icon"
+            android:src="@drawable/select_file_icon"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -56,34 +56,9 @@
             android:layout_gravity="center"
             android:layout_marginStart="16dp"
             android:fontFamily="@font/lato"
-            android:text="@string/option_viewFolder"
+            android:text="@string/option_selectFile"
             android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>
-    <LinearLayout
-        android:id="@+id/bottomSheet_moreInfo"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        tools:ignore="UseCompoundDrawables">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/moreinfo_icon"
-            tools:ignore="ContentDescription" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="16dp"
-            android:fontFamily="@font/lato"
-            android:text="@string/option_moreInfo"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-    </LinearLayout>
 </LinearLayout>

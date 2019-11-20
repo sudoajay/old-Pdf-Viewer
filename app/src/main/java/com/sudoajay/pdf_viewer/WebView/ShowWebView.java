@@ -35,7 +35,7 @@ public class ShowWebView extends AppCompatActivity {
 
     }
 
-    @SuppressLint({"WrongConstant", "SetJavaScriptEnabled"})
+    @SuppressLint({"WrongConstant", "SetJavaScriptEnabled", "ClickableViewAccessibility"})
     private void setupWebView() {
         myWebView = findViewById(R.id.webview);
 
@@ -48,6 +48,7 @@ public class ShowWebView extends AppCompatActivity {
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setBuiltInZoomControls(true);
+        settings.setSupportZoom(true);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         myWebView.setWebViewClient(new WebViewClient());

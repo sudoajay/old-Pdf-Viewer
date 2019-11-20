@@ -2,17 +2,21 @@ package com.sudoajay.pdf_viewer.HelperClass;
 
 import android.content.Context;
 
+import com.sudoajay.pdf_viewer.Database_Classes.Database;
+
 import java.io.File;
 import java.util.ArrayList;
 
 public class ScanPdf {
     private ArrayList<String> pdfPath = new ArrayList<>();
     private Context mContext;
+    private Database database;
 
-
-    public void Duplication(final Context mContext, final String external_dir, final String sd_Card_dir) {
+    public void scanFIle(final Context mContext, final String external_dir, final String sd_Card_dir) {
 
         this.mContext = mContext;
+        database = new Database(mContext);
+
         if (new File(external_dir).exists()) {
             GetAllPath(new File(external_dir));
         }
@@ -20,18 +24,22 @@ public class ScanPdf {
             GetAllPath(new File(sd_Card_dir));
         }
 
+// Empty If the database have something
+        if (!database.isEmpty())
+            database.deleteData();
+
     }
 
     private void GetAllPath(final File directory) {
+        String extension = ".pdf", getName;
         try {
-            String getName, getExt;
+
             for (File child : directory.listFiles())
-                if (child.isDirectory() && !child.equals(mContext.getExternalCacheDir())) {
+                if (child.isDirectory()) {
                     GetAllPath(child);
                 } else {
                     getName = child.getName();
-                    getExt = getExtension(getName);
-                    if (getExt.equals("pdf"))
+                    if (getName.endsWith(extension))
                         pdfPath.add(child.getAbsolutePath());
                 }
         } catch (Exception ignored) {
@@ -39,14 +47,6 @@ public class ScanPdf {
         }
     }
 
-    private String getExtension(final String path) {
-        int i = path.lastIndexOf('.');
-        String extension = "";
-        if (i > 0) {
-            extension = path.substring(i + 1);
-        }
-        return extension;
-    }
 
     public ArrayList<String> getPdfPath() {
         return pdfPath;

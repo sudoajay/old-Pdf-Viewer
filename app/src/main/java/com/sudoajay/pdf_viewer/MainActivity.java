@@ -2,13 +2,21 @@ package com.sudoajay.pdf_viewer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.SearchManager;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.OpenableColumns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -17,12 +25,15 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.sudoajay.lodinganimation.LoadingAnimation;
 import com.sudoajay.pdf_viewer.Custom_Dialog.Dialog_InformationData;
 import com.sudoajay.pdf_viewer.HelperClass.CopyFile;
 import com.sudoajay.pdf_viewer.HelperClass.CustomToast;
@@ -37,9 +48,10 @@ import com.sudoajay.pdf_viewer.WebView.ShowWebView;
 import java.io.File;
 import java.util.ArrayList;
 
+;
+
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
 
-    private static final String TAG = "GotSomething";
     private AndroidExternalStoragePermission androidExternalStoragePermission;
     private AndroidSdCardPermission androidSdCardPermission;
     private ImageView refresh_imageView;
@@ -47,8 +59,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ArrayList<String> getPdfPath = new ArrayList<>();
     private RecyclerView recyclerView;
     private ViewTreeObserver.OnScrollChangedListener mOnScrollChangedListener;
-    private BottomSheetDialog mBottomSheetDialog;
+    private final int requestCode = 100;
     private String path;
+    private BottomSheetDialog mBottomSheetDialog, bottomSheetDialog1;
+    private LoadingAnimation loadingAnimation;
+    private Uri fileUri;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 //        Take Permission
         if (!androidExternalStoragePermission.isExternalStorageWritable()) {
-            androidExternalStoragePermission.call_Thread();
+            mBottomSheetDialog.show();
         } else {
             new MultiThreadingScanning().execute();
         }
@@ -70,15 +86,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 new RecyclerItemClickListener(getApplicationContext(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        path = getPdfPath.get(position);
                         // do whatever
-
+                        new MultiThreadingCopying().execute();
                     }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
                         // do whatever
                         path = getPdfPath.get(position);
-                        mBottomSheetDialog.show();
+                        bottomSheetDialog1.show();
                     }
                 })
         );
@@ -90,6 +107,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         recyclerView = findViewById(R.id.recyclerView);
         swipeToRefresh = findViewById(R.id.swipeToRefresh);
         swipeToRefresh.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
+        loadingAnimation = findViewById(R.id.loadingAnimation);
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         swipeToRefresh.setOnRefreshListener(this);
 
@@ -100,20 +121,46 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         androidSdCardPermission = new AndroidSdCardPermission(getApplicationContext(), MainActivity.this);
 
-
+//         Select Option
         mBottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-        @SuppressLint("InflateParams") View sheetView = getLayoutInflater().inflate(R.layout.layout_dialog_moreoption, null);
+        @SuppressLint("InflateParams") View sheetView = getLayoutInflater().inflate(R.layout.layout_dialog_selectoption, null);
         mBottomSheetDialog.setContentView(sheetView);
+        mBottomSheetDialog.setCancelable(false);
+        LinearLayout bottomSheet_scanFile = sheetView.findViewById(R.id.bottomSheet_scanFile);
+        bottomSheet_scanFile.setOnClickListener(this);
+        LinearLayout bottomSheet_selectFile = sheetView.findViewById(R.id.bottomSheet_selectFile);
+        bottomSheet_selectFile.setOnClickListener(this);
 
-        LinearLayout fragment_history_bottom_sheet_openFile = sheetView.findViewById(R.id.fragment_history_bottom_sheet_openFile);
-        fragment_history_bottom_sheet_openFile.setOnClickListener(this);
-        LinearLayout fragment_history_bottom_sheet_viewFolder = sheetView.findViewById(R.id.fragment_history_bottom_sheet_viewFolder);
-        fragment_history_bottom_sheet_viewFolder.setOnClickListener(this);
-        LinearLayout fragment_history_bottom_sheet_moreInfo = sheetView.findViewById(R.id.fragment_history_bottom_sheet_moreInfo);
-        fragment_history_bottom_sheet_moreInfo.setOnClickListener(this);
+
+//        More Option for file
+        bottomSheetDialog1 = new BottomSheetDialog(MainActivity.this);
+        @SuppressLint("InflateParams") View sheetView1 = getLayoutInflater().inflate(R.layout.layout_dialog_moreoption, null);
+        bottomSheetDialog1.setContentView(sheetView1);
+
+        LinearLayout bottomSheet_openFile = sheetView1.findViewById(R.id.bottomSheet_openFile);
+        bottomSheet_openFile.setOnClickListener(this);
+        LinearLayout bottomSheet_viewFolder = sheetView1.findViewById(R.id.bottomSheet_viewFolder);
+        bottomSheet_viewFolder.setOnClickListener(this);
+        LinearLayout bottomSheet_moreInfo = sheetView1.findViewById(R.id.bottomSheet_moreInfo);
+        bottomSheet_moreInfo.setOnClickListener(this);
+
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        return true;
+    }
     private void fillItem() {
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -130,11 +177,26 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         recyclerView.invalidate();
     }
 
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//
+//        switch (item.getItemId()) {
+//            case R.id.action_search:
+//                //add the function to perform here
+//                return (true);
+//            case R.id.action_refresh:
+//                //add the function to perform here
+//                return (true);
+//
+//        }
+//        return (super.onOptionsItemSelected(item));
+//    }
+
     public void OnClick(View view) {
         switch (view.getId()) {
-            case R.id.share_imageView:
-                Share();
-                break;
+//            case R.id.search_imageView:
+//                Share();
+//                break;
             case R.id.refresh_imageView:
                 if (refresh_imageView != null && refresh_imageView.getRotation() % 360 == 0) {
                     refresh_imageView.animate().rotationBy(360f).setDuration(1000);
@@ -154,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     private void refreshList() {
+        CustomToast.ToastIt(getApplicationContext(), "Refreshing");
         getPdfPath.clear();
         fillItem();
 
@@ -168,8 +231,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.
-                CustomToast.ToastIt(MainActivity.this, "Permission denied to read your External storage");
+                CustomToast.ToastIt(MainActivity.this, "Give us permission for further process ");
 
+                if (!androidExternalStoragePermission.isExternalStorageWritable())
+                    androidExternalStoragePermission.call_Thread();
             } else {
                 new MultiThreadingScanning().execute();
             }
@@ -186,6 +251,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         Uri sd_Card_URL;
         String sd_Card_Path_URL, string_URI;
 
+        if (this.requestCode == requestCode && data != null) {
+            fileUri = data.getData();
+            mBottomSheetDialog.cancel();
+            new MultiThreadingCopying().execute();
+
+            return;
+        }
         if (resultCode != Activity.RESULT_OK)
             return;
         sd_Card_URL = data.getData();
@@ -225,6 +297,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         return paths[0] + getPaths[getPaths.length - 1];
     }
 
+    private String queryName(ContentResolver resolver, Uri uri) {
+        Cursor returnCursor =
+                resolver.query(uri, null, null, null, null);
+        assert returnCursor != null;
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        returnCursor.moveToFirst();
+        String name = returnCursor.getString(nameIndex);
+        returnCursor.close();
+        return name;
+    }
 
     @Override
     public void onRefresh() {
@@ -243,18 +325,35 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public void onClick(View view) {
 
         switch (view.getId()) {
-            case R.id.fragment_history_bottom_sheet_openFile:
+            case R.id.bottomSheet_scanFile:
+                if (!androidExternalStoragePermission.isExternalStorageWritable())
+                    androidExternalStoragePermission.call_Thread();
+                mBottomSheetDialog.cancel();
+                break;
+            case R.id.bottomSheet_selectFile:
+                openFileManager();
+                break;
+            case R.id.bottomSheet_openFile:
                 new MultiThreadingCopying().execute();
                 break;
-            case R.id.fragment_history_bottom_sheet_viewFolder:
+            case R.id.bottomSheet_viewFolder:
                 SpecificFolder();
                 break;
-            case R.id.fragment_history_bottom_sheet_moreInfo:
+            case R.id.bottomSheet_moreInfo:
                 Dialog_InformationData();
-                mBottomSheetDialog.dismiss();
+                bottomSheetDialog1.dismiss();
                 break;
 
         }
+    }
+
+    private void openFileManager() {
+        Intent intent = new Intent();
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        // Set your required file type
+        intent.setType("application/pdf");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Pdf File"), requestCode);
     }
 
 
@@ -277,19 +376,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         information_data.show(ft, "dialog");
     }
 
+
     @SuppressLint("StaticFieldLeak")
     public class MultiThreadingScanning extends AsyncTask<String, String, String> {
         private ScanPdf scanPdf;
 
         @Override
         protected void onPreExecute() {
+            loadingAnimation.start();
             getPdfPath.clear();
             scanPdf = new ScanPdf();
         }
 
         @Override
         protected String doInBackground(String... strings) {
-            scanPdf.Duplication(MainActivity.this, androidExternalStoragePermission.getExternal_Path(), androidSdCardPermission.getSd_Card_Path_URL());
+            scanPdf.scanFIle(MainActivity.this, androidExternalStoragePermission.getExternal_Path(), androidSdCardPermission.getSd_Card_Path_URL());
 
             return null;
         }
@@ -297,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-
+            loadingAnimation.stop();
             getPdfPath = scanPdf.getPdfPath();
 
             fillItem();
@@ -336,17 +437,26 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         protected void onPreExecute() {
 
+
         }
 
         @Override
         protected String doInBackground(String... strings) {
             try {
-                File src = new File(path);
-                dst = new File(getExternalCacheDir() + "/" + src.getName());
+                if (fileUri == null) {
+
+                    File src = new File(path);
+                    dst = new File(getCacheDir() + "/" + src.getName());
 
 //                If file exist with same size
-                if (!(dst.exists() && dst.length() == src.length()))
-                    CopyFile.copy(src, dst);
+                    if (!dst.exists())
+                        CopyFile.copy(src, dst);
+
+                } else {
+                    dst = new File(getCacheDir() + "/" + queryName(getContentResolver(), fileUri));
+                    if (!dst.exists())
+                        CopyFile.copyUri(MainActivity.this, fileUri, dst);
+                }
             } catch (Exception ignored) {
 
             }
@@ -357,6 +467,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+
             Intent intent = new Intent(getApplicationContext(), ShowWebView.class);
             intent.setAction(dst.getAbsolutePath());
             startActivity(intent);
