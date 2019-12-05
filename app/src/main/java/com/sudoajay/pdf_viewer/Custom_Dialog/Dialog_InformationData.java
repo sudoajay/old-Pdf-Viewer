@@ -30,6 +30,7 @@ import com.sudoajay.pdf_viewer.R;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Objects;
 
 public class Dialog_InformationData extends DialogFragment implements View.OnClickListener {
 
@@ -46,12 +47,13 @@ public class Dialog_InformationData extends DialogFragment implements View.OnCli
         this.activity = mainActivity;
     }
 
+    @SuppressLint("NewApi")
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         rootview = inflater.inflate(R.layout.layout_dialog_informationdata, container, false);
         Reference();
         // setup dialog box
-        (getDialog()).getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Objects.requireNonNull((Objects.requireNonNull(getDialog())).getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         constraintLayout.setBackgroundColor(getResources().getColor(R.color.tabBackgroundColor));
         // Fill Dialog Box
         FillIt();
@@ -92,7 +94,7 @@ public class Dialog_InformationData extends DialogFragment implements View.OnCli
         if (filePath.isDirectory()) {
             infoType_TextView.setText("Folder");
         } else {
-            infoType_TextView.setText(getMimeType(path));
+            infoType_TextView.setText("application/pdf");
         }
 
 
@@ -105,7 +107,7 @@ public class Dialog_InformationData extends DialogFragment implements View.OnCli
         }
 
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy , HH:mm:ss");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("d MMM yyyy , h:mm a");
         infoCreated_TextView.setText(sdf.format(filePath.lastModified()));
 
     }
@@ -168,13 +170,13 @@ public class Dialog_InformationData extends DialogFragment implements View.OnCli
         }
     }
 
-    private static String getMimeType(String url) {
-        String type = null;
-        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-        if (extension != null) {
-            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-        }
-        return type;
-    }
+//    private static String getMimeType(String url) {
+//        String type = null;
+//        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+//        if (extension != null) {
+//            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+//        }
+//        return type;
+//    }
 
 }

@@ -12,17 +12,20 @@ public class Database extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Database.db";
     private static final String DATABASE_TABLE_NAME = "BackgroundTimerDATABASE_TABLE_NAME";
     private static final String col_1 = "ID";
-    private static final String col_2 = "Path";
+    private static final String col_2 = "Name";
+    private static final String col_3 = "Path";
+    private static final int DATABASE_VERSION = 1;
+
 
     public Database(Context context) {
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + DATABASE_TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                "Path TEXT)");
+                " Name TEXT ,Path TEXT)");
 
     }
 
@@ -34,13 +37,15 @@ public class Database extends SQLiteOpenHelper {
 
     public void deleteData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(DATABASE_TABLE_NAME, "ID =?", new String[]{1 + ""});
+
+        db.execSQL("delete from "+ DATABASE_TABLE_NAME);
     }
 
-    public void FillIt(int Path) {
+    public void fill(final String name,final String Path) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(col_2, Path);
+        contentValues.put(col_2, name);
+        contentValues.put(col_3, Path);
         sqLiteDatabase.insert(DATABASE_TABLE_NAME, null, contentValues);
     }
 
@@ -52,28 +57,31 @@ public class Database extends SQLiteOpenHelper {
         return count <= 0;
     }
 
-    public Cursor GetTheValueFromId() {
+
+    public Cursor getSize() {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        return sqLiteDatabase.rawQuery("SELECT * FROM " + DATABASE_TABLE_NAME, null);
+        return sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + DATABASE_TABLE_NAME, null);
     }
 
-    public Cursor GetTheRepeatedlyWeekdays() {
+    public Cursor getValue(final String filter) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        return sqLiteDatabase.rawQuery("SELECT  Repeatedly ,Weekdays FROM " + DATABASE_TABLE_NAME, null);
-    }
-
-    public Cursor GetTheChoose_TypeRepeatedlyEndlessly() {
-        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        return sqLiteDatabase.rawQuery("SELECT Repeatedly,Weekdays,Endlessly FROM " + DATABASE_TABLE_NAME, null);
+        return sqLiteDatabase.rawQuery("SELECT Path FROM "+ DATABASE_TABLE_NAME +" WHERE name Like '%" + filter + "%'"
+              , null);
     }
 
 
-    public void UpdateTheTable(String id, int Path) {
+    public Cursor getPath() {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        return sqLiteDatabase.rawQuery("SELECT path FROM " + DATABASE_TABLE_NAME, null);
+    }
+
+
+    public void UpdateTheTable(final String id, final String name,final String Path) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(col_1, id);
-        contentValues.put(col_2, Path);
-
+        contentValues.put(col_2, name);
+        contentValues.put(col_3, Path);
         sqLiteDatabase.update(DATABASE_TABLE_NAME, contentValues, "ID = ?", new String[]{id});
     }
 

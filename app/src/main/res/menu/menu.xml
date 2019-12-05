@@ -10,15 +10,56 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
 
-    <item android:visible="true" android:id="@+id/m_area"
-        android:titleCondensed="Areas"
-        android:title="Areas"
+    <item
+        android:id="@+id/sort_optionMenu"
+        android:title="@string/sort_optionMenu"
+        android:visible="true"
         android:enabled="true"
         app:showAsAction="never">
         <menu>
+            <group
+                android:id="@+id/group"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/sort_name_optionMenu"
+                    android:title="@string/sort_name_optionMenu" />
+                <item
+                    android:id="@+id/sort_date_optionMenu"
+                    android:title="@string/sort_date_optionMenu" />
+                <item
+                    android:id="@+id/sort_size_optionMenu"
+                    android:title="@string/sort_size_optionMenu" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/refresh_optionMenu"
+        android:title="@string/refresh_optionMenu" />
+    <item
+        android:id="@+id/filePicker_optionMenu"
+        android:title="@string/filePicker_optionMenu" />
+
+    <item
+        android:id="@+id/more_optionMenu"
+        android:enabled="true"
+        android:title="@string/more_optionMenu"
+        android:visible="true"
+        app:showAsAction="never">
+        <menu>
             <item
-                android:id="@+id/item1"
-                android:title="Placeholder" />
+                android:id="@+id/more_sendFeedback_optionMenu"
+                android:title="@string/more_sendFeedback_optionMenu" />
+            <item
+                android:id="@+id/more_rateUs_optionMenu"
+                android:title="@string/more_rateUs_optionMenu" />
+            <item
+                android:id="@+id/sort_shareApp_optionMenu"
+                android:title="@string/sort_size_optionMenu" />
+            <item
+                android:id="@+id/sort_aboutApp_optionMenu"
+                android:title="@string/sort_aboutApp_optionMenu" />
+
         </menu>
     </item>
 

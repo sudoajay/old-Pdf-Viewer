@@ -67,5 +67,17 @@
 <!--Menu Item-->
     <string name="search_menuItem">Search</string>
 
+<!--    Option menu-->
+    <string name="sort_optionMenu">Sort</string>
+    <string name="sort_date_optionMenu">By Date</string>
+    <string name="sort_name_optionMenu">By Name</string>
+    <string name="sort_size_optionMenu">By Size</string>
+    <string name="refresh_optionMenu">Refresh</string>
+    <string name="filePicker_optionMenu">File Picker</string>
+    <string name="more_optionMenu">More</string>
+    <string name="more_sendFeedback_optionMenu">Send Feedback</string>
+    <string name="more_rateUs_optionMenu">Rate Us</string>
+    <string name="sort_shareApp_optionMenu">Share App</string>
+    <string name="sort_aboutApp_optionMenu">About App</string>
 
 </resources>

@@ -2,9 +2,7 @@ package com.sudoajay.pdf_viewer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -19,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -35,6 +34,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.sudoajay.lodinganimation.LoadingAnimation;
 import com.sudoajay.pdf_viewer.Custom_Dialog.Dialog_InformationData;
+import com.sudoajay.pdf_viewer.Database_Classes.Database;
 import com.sudoajay.pdf_viewer.HelperClass.CopyFile;
 import com.sudoajay.pdf_viewer.HelperClass.CustomToast;
 import com.sudoajay.pdf_viewer.HelperClass.ScanPdf;
@@ -48,9 +48,8 @@ import com.sudoajay.pdf_viewer.WebView.ShowWebView;
 import java.io.File;
 import java.util.ArrayList;
 
-;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener, SearchView.OnQueryTextListener {
 
     private AndroidExternalStoragePermission androidExternalStoragePermission;
     private AndroidSdCardPermission androidSdCardPermission;
@@ -65,6 +64,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private LoadingAnimation loadingAnimation;
     private Uri fileUri;
     private Toolbar toolbar;
+    private Database database;
+    private MyAdapter mAdapter;
+    private static final String TAG = "GotSomething";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,28 +83,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             new MultiThreadingScanning().execute();
         }
 
-
-//        Recycler set On touch
-        recyclerView.addOnItemTouchListener(
-                new RecyclerItemClickListener(getApplicationContext(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        path = getPdfPath.get(position);
-                        // do whatever
-                        new MultiThreadingCopying().execute();
-                    }
-
-                    @Override
-                    public void onLongItemClick(View view, int position) {
-                        // do whatever
-                        path = getPdfPath.get(position);
-                        bottomSheetDialog1.show();
-                    }
-                })
-        );
-
     }
 
+
+    public void sendSdCardPermission() {
+        if (!androidSdCardPermission.isSdStorageWritable()) {
+            CustomToast.ToastIt(getApplicationContext(), "Select the SD Card Root Path");
+            androidSdCardPermission.call_Thread();
+        }
+    }
     private void Reference() {
         refresh_imageView = findViewById(R.id.refresh_imageView);
         recyclerView = findViewById(R.id.recyclerView);
@@ -116,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         // create object
 
+        database = new Database(getApplicationContext());
 
         androidExternalStoragePermission = new AndroidExternalStoragePermission(MainActivity.this, MainActivity.this);
 
@@ -147,20 +138,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
 
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-        return true;
-    }
     private void fillItem() {
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -171,41 +149,83 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter (see also next example)
-        RecyclerView.Adapter mAdapter = new MyAdapter(getPdfPath);
+        mAdapter = new MyAdapter(getApplicationContext(), MainActivity.this, new ArrayList<>(getPdfPath));
         recyclerView.setAdapter(mAdapter);
 
         recyclerView.invalidate();
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//
-//        switch (item.getItemId()) {
-//            case R.id.action_search:
-//                //add the function to perform here
-//                return (true);
-//            case R.id.action_refresh:
-//                //add the function to perform here
-//                return (true);
-//
-//        }
-//        return (super.onOptionsItemSelected(item));
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+
+
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        searchView.setOnQueryTextListener(this);
+
+        menuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                clearDataBaseItem();
+                for (String get : getPdfPath) {
+                    database.fill(new File(get).getName(), get);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                mAdapter.backToNormal(getPdfPath);
+                return true;
+            }
+        });
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.sort_name_optionMenu:
+
+                break;
+            case R.id.sort_date_optionMenu:
+
+                break;
+            case R.id.sort_size_optionMenu:
+
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return false;
+    }
 
     public void OnClick(View view) {
-        switch (view.getId()) {
-//            case R.id.search_imageView:
-//                Share();
-//                break;
-            case R.id.refresh_imageView:
-                if (refresh_imageView != null && refresh_imageView.getRotation() % 360 == 0) {
-                    refresh_imageView.animate().rotationBy(360f).setDuration(1000);
-                    refreshList();
-                }
-                break;
+        if (view.getId() == R.id.refresh_imageView) {
+            if (refresh_imageView != null && refresh_imageView.getRotation() % 360 == 0) {
+                refresh_imageView.animate().rotationBy(360f).setDuration(1000);
+                refreshList();
+            }
         }
     }
 
+    public void openPdf(final String path) {
+        this.path = path;
+        // do whatever
+        new MultiThreadingCopying().execute();
+    }
+
+    public void openMoreOption(final String path) {
+        // do whatever
+        this.path = path;
+        bottomSheetDialog1.show();
+    }
     private void Share() {
         String rating_link = "https://play.google.com/store/apps/details?id=com.sudoajay.whatsapp_media_mover";
         Intent i = new Intent(android.content.Intent.ACTION_SEND);
@@ -216,10 +236,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     private void refreshList() {
-        CustomToast.ToastIt(getApplicationContext(), "Refreshing");
-        getPdfPath.clear();
-        fillItem();
-
+        clearDataBaseItem();
         new MultiThreadingScanning().execute();
     }
 
@@ -277,7 +294,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         androidSdCardPermission.setSd_Card_Path_URL(sd_Card_Path_URL);
         androidSdCardPermission.setString_URI(string_URI);
 
-
+        // refresh when you get sd card path
+        if (androidSdCardPermission.isSdStorageWritable())
+            refreshList();
     }
 
     private boolean isSamePath(String sd_Card_Path_URL) {
@@ -376,6 +395,37 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         information_data.show(ft, "dialog");
     }
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+
+        mAdapter.getFilter().filter(query);
+
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        mAdapter.getFilter().filter(newText);
+        return false;
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+    }
+
+    private void countDatabaseItem() {
+        int size;
+        Cursor cursor = database.getSize();
+        if (cursor != null && cursor.moveToFirst()) {
+            cursor.moveToFirst();
+            size = Integer.parseInt(cursor.getString(0));
+//            Log.e(TAG, "" + size);
+        }
+    }
+
+    private void clearDataBaseItem() {
+        if (!database.isEmpty()) database.deleteData();
+    }
 
     @SuppressLint("StaticFieldLeak")
     public class MultiThreadingScanning extends AsyncTask<String, String, String> {
@@ -400,9 +450,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             super.onPostExecute(s);
             loadingAnimation.stop();
             getPdfPath = scanPdf.getPdfPath();
-
             fillItem();
-
         }
 
     }

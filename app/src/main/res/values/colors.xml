@@ -41,6 +41,6 @@
     <color name="toastTextColor">#D6D1D1</color>
 
     <!--Info Layout -->
-    <color name="infoLayout_BackColor">#2546ABEB</color>
+    <color name="infoLayout_BackColor">#946FBDE7</color>
     <color name="tabBackgroundColor">#ffffff</color>
 </resources>

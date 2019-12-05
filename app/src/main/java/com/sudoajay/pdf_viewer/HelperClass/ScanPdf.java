@@ -1,11 +1,13 @@
 package com.sudoajay.pdf_viewer.HelperClass;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.sudoajay.pdf_viewer.Database_Classes.Database;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ScanPdf {
     private ArrayList<String> pdfPath = new ArrayList<>();
@@ -30,11 +32,11 @@ public class ScanPdf {
 
     }
 
+    @SuppressLint("NewApi")
     private void GetAllPath(final File directory) {
         String extension = ".pdf", getName;
         try {
-
-            for (File child : directory.listFiles())
+            for (File child : Objects.requireNonNull(directory.listFiles()))
                 if (child.isDirectory()) {
                     GetAllPath(child);
                 } else {

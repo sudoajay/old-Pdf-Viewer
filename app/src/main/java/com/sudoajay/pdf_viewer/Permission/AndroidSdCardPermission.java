@@ -47,22 +47,24 @@ public class AndroidSdCardPermission {
                 @Override
                 public void run() {
 
-                    Call_Custom_Dailog_Changes();
+                    Storage_Access_FrameWork();
                 }
             }, 1800);
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void Storage_Access_FrameWork() {
         try {
-            final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            int REQUEST_CODE_OPEN_DOCUMENT_TREE = 42;
+            final Intent intent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+                int REQUEST_CODE_OPEN_DOCUMENT_TREE = 42;
 
 
-            activity.startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
+                activity.startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE);
 
-
+            }
         } catch (Exception e) {
             Toast.makeText(context, "There is Error Please Report It",Toast.LENGTH_LONG).show();
         }
