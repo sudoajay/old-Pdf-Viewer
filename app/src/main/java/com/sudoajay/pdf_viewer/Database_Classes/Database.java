@@ -14,6 +14,8 @@ public class Database extends SQLiteOpenHelper {
     private static final String col_1 = "ID";
     private static final String col_2 = "Name";
     private static final String col_3 = "Path";
+    private static final String col_4 = "Size";
+    private static final String col_5 = "Date";
     private static final int DATABASE_VERSION = 1;
 
 
@@ -25,7 +27,7 @@ public class Database extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + DATABASE_TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT , " +
-                " Name TEXT ,Path TEXT)");
+                " Name TEXT ,Path TEXT , Size long , Date long)");
 
     }
 
@@ -41,11 +43,13 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL("delete from "+ DATABASE_TABLE_NAME);
     }
 
-    public void fill(final String name,final String Path) {
+    public void fill(final String name, final String Path, final long Size, final long Date) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(col_2, name);
         contentValues.put(col_3, Path);
+        contentValues.put(col_4, Size);
+        contentValues.put(col_5, Date);
         sqLiteDatabase.insert(DATABASE_TABLE_NAME, null, contentValues);
     }
 
@@ -70,18 +74,27 @@ public class Database extends SQLiteOpenHelper {
     }
 
 
-    public Cursor getPath() {
+    public Cursor getLastModified() {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        return sqLiteDatabase.rawQuery("SELECT path FROM " + DATABASE_TABLE_NAME, null);
+        return sqLiteDatabase.rawQuery("SELECT path  FROM " + DATABASE_TABLE_NAME + " ORDER BY Date DESC ", null);
+    }
+    public Cursor getPathFromName() {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        return sqLiteDatabase.rawQuery("SELECT path  FROM " + DATABASE_TABLE_NAME + " ORDER BY Name ASC ", null);
+    }
+    public Cursor getpathFromSize() {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        return sqLiteDatabase.rawQuery("SELECT path  FROM " + DATABASE_TABLE_NAME + " ORDER BY Size DESC ", null);
     }
 
-
-    public void UpdateTheTable(final String id, final String name,final String Path) {
+    public void UpdateTheTable(final String id, final String name, final String Path, final long Size, final long Date) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(col_1, id);
         contentValues.put(col_2, name);
         contentValues.put(col_3, Path);
+        contentValues.put(col_4, Size);
+        contentValues.put(col_5, Date);
         sqLiteDatabase.update(DATABASE_TABLE_NAME, contentValues, "ID = ?", new String[]{id});
     }
 

@@ -41,7 +41,6 @@ import com.sudoajay.pdf_viewer.HelperClass.ScanPdf;
 import com.sudoajay.pdf_viewer.Permission.AndroidExternalStoragePermission;
 import com.sudoajay.pdf_viewer.Permission.AndroidSdCardPermission;
 import com.sudoajay.pdf_viewer.RecyclerView.MyAdapter;
-import com.sudoajay.pdf_viewer.RecyclerView.RecyclerItemClickListener;
 import com.sudoajay.pdf_viewer.SdCard.SdCardPath;
 import com.sudoajay.pdf_viewer.WebView.ShowWebView;
 
@@ -67,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private Database database;
     private MyAdapter mAdapter;
     private static final String TAG = "GotSomething";
+    private String rating_link = "https://play.google.com/store/apps/details?id=com.sudoajay.whatsapp_media_mover";
+    private MenuItem sort_date_optionMenu, sort_name_optionMenu, sort_size_optionMenu;
 
 
     @Override
@@ -162,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 
         MenuItem menuItem = menu.findItem(R.id.action_search);
+        sort_name_optionMenu = menu.findItem(R.id.sort_name_optionMenu);
+        sort_date_optionMenu = menu.findItem(R.id.sort_date_optionMenu);
+        sort_size_optionMenu = menu.findItem(R.id.sort_size_optionMenu);
+
         SearchView searchView = (SearchView) menuItem.getActionView();
         searchView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         searchView.setOnQueryTextListener(this);
@@ -171,17 +176,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             public boolean onMenuItemActionExpand(MenuItem menuItem) {
                 clearDataBaseItem();
                 for (String get : getPdfPath) {
-                    database.fill(new File(get).getName(), get);
+                    File file = new File(get);
+                    database.fill(file.getName(), get, file.length(), file.lastModified());
                 }
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                mAdapter.backToNormal(getPdfPath);
+                mAdapter.transferItem(getPdfPath);
                 return true;
             }
         });
+
 
         return true;
     }
@@ -189,21 +196,75 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.sort_name_optionMenu:
 
+
+        switch (item.getItemId()) {
+
+            case R.id.sort_name_optionMenu:
+                SortingResult(1);
+                item.setChecked(true);
+                mAdapter.transferItem(getPdfPath);
                 break;
             case R.id.sort_date_optionMenu:
-
+                SortingResult(2);
+                item.setChecked(true);
+                mAdapter.transferItem(getPdfPath);
                 break;
             case R.id.sort_size_optionMenu:
-
+                SortingResult(3);
+                item.setChecked(true);
+                mAdapter.transferItem(getPdfPath);
+                break;
+            case R.id.refresh_optionMenu:
+                refreshList();
+                break;
+            case R.id.filePicker_optionMenu:
+                openFileManager();
+                break;
+            case R.id.more_sendFeedback_optionMenu:
+                openEmail();
+                break;
+            case R.id.more_rateUs_optionMenu:
+                rateUs();
+                break;
+            case R.id.sort_shareApp_optionMenu:
+                shareIt();
+                break;
+            case R.id.sort_aboutApp_optionMenu:
+                aboutApp();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
-        return false;
+        return true;
+    }
+
+    private void SortingResult(final int type) {
+        clearDataBaseItem();
+        for (String get : getPdfPath) {
+            File file = new File(get);
+            database.fill(file.getName(), get, file.length(), file.lastModified());
+        }
+        getPdfPath.clear();
+        if (!database.isEmpty()) {
+            Cursor cursor;
+
+            if (type == 1) cursor = database.getPathFromName();
+            else if (type == 2) cursor = database.getLastModified();
+            else {
+                cursor = database.getpathFromSize();
+            }
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    getPdfPath.add(cursor.getString(0));
+
+                } while (cursor.moveToNext());
+            }
+        }
+
+
     }
 
     public void OnClick(View view) {
@@ -226,8 +287,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         this.path = path;
         bottomSheetDialog1.show();
     }
-    private void Share() {
-        String rating_link = "https://play.google.com/store/apps/details?id=com.sudoajay.whatsapp_media_mover";
+
+    private void shareIt() {
+
         Intent i = new Intent(android.content.Intent.ACTION_SEND);
         i.setType("text/plain");
         i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Link-Share");
@@ -235,6 +297,31 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         startActivity(Intent.createChooser(i, "Share via"));
     }
 
+    public void rateUs() {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(rating_link));
+        startActivity(i);
+    }
+
+    public void aboutApp() {
+        String appLink = "";
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(appLink));
+        startActivity(i);
+    }
+
+    public void openEmail() {
+
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("mailto:" + "sudoajay@gmail.com"));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "");
+            intent.putExtra(Intent.EXTRA_TEXT, "");
+            startActivity(intent);
+        } catch (Exception e) {
+            CustomToast.ToastIt(getApplicationContext(), "There is no Email App");
+        }
+
+    }
     private void refreshList() {
         clearDataBaseItem();
         new MultiThreadingScanning().execute();
@@ -450,10 +537,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             super.onPostExecute(s);
             loadingAnimation.stop();
             getPdfPath = scanPdf.getPdfPath();
+
+            int type;
+            if (sort_date_optionMenu.isChecked()) type = 2;
+            else if (sort_name_optionMenu.isChecked()) type = 1;
+            else {
+                type = 3;
+            }
+
+            SortingResult(type);
+
             fillItem();
         }
-
     }
+
 
     @Override
     public void onStart() {

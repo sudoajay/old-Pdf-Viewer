@@ -3,6 +3,7 @@ package com.sudoajay.pdf_viewer.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -125,7 +126,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
         return (position == item.size()) ? R.layout.layout_scan_sdcard : R.layout.layout_recycler_view;
     }
 
-    public void backToNormal(final ArrayList<String> value) {
+    public void transferItem(final ArrayList<String> value) {
+        item.clear();
         item.addAll(value);
         notifyDataSetChanged();
     }

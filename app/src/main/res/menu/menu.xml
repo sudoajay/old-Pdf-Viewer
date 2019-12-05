@@ -25,6 +25,7 @@
                     android:title="@string/sort_name_optionMenu" />
                 <item
                     android:id="@+id/sort_date_optionMenu"
+                    android:checked="true"
                     android:title="@string/sort_date_optionMenu" />
                 <item
                     android:id="@+id/sort_size_optionMenu"
@@ -55,7 +56,7 @@
                 android:title="@string/more_rateUs_optionMenu" />
             <item
                 android:id="@+id/sort_shareApp_optionMenu"
-                android:title="@string/sort_size_optionMenu" />
+                android:title="@string/sort_shareApp_optionMenu" />
             <item
                 android:id="@+id/sort_aboutApp_optionMenu"
                 android:title="@string/sort_aboutApp_optionMenu" />
