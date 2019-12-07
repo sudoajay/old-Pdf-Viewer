@@ -11,7 +11,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -74,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        handleIntent(getIntent());
 
         Reference();
 
@@ -335,10 +339,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 // permission denied, boo! Disable the
                 // functionality that depends on this permission.
-                CustomToast.ToastIt(MainActivity.this, "Give us permission for further process ");
+//                CustomToast.ToastIt(MainActivity.this, "Give us permission for further process ");
 
-                if (!androidExternalStoragePermission.isExternalStorageWritable())
-                    androidExternalStoragePermission.call_Thread();
+                mBottomSheetDialog.show();
+//                if (!androidExternalStoragePermission.isExternalStorageWritable())
+//                    androidExternalStoragePermission.call_Thread();
             } else {
                 new MultiThreadingScanning().execute();
             }
@@ -348,7 +353,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // local variable
         super.onActivityResult(requestCode, resultCode, data);
@@ -357,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         if (this.requestCode == requestCode && data != null) {
             fileUri = data.getData();
-            mBottomSheetDialog.cancel();
+            Log.e(TAG, fileUri.getPath() + " --- " + fileUri.getEncodedPath());
             new MultiThreadingCopying().execute();
 
             return;
@@ -367,7 +371,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         sd_Card_URL = data.getData();
         MainActivity.this.grantUriPermission(MainActivity.this.getPackageName(), sd_Card_URL, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         assert sd_Card_URL != null;
-        MainActivity.this.getContentResolver().takePersistableUriPermission(sd_Card_URL, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            MainActivity.this.getContentResolver().takePersistableUriPermission(sd_Card_URL, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        }
         sd_Card_Path_URL = SdCardPath.getFullPathFromTreeUri(sd_Card_URL, MainActivity.this);
 
         string_URI = sd_Card_URL.toString();
@@ -475,6 +481,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             CustomToast.ToastIt(getApplicationContext(), "No file explorer found");
         }
     }
+
+    private void handleIntent(final Intent intent) {
+        //Kinda not recommended by google but watever
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
+        Uri appLinkData = intent.getData();
+        String appLinkAction = intent.getAction();
+
+        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null) {
+            fileUri = appLinkData;
+        }
+        new MultiThreadingCopying().execute();
+    }
+
 
     public void Dialog_InformationData() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -588,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         protected String doInBackground(String... strings) {
             try {
-                if (fileUri == null) {
+                if (fileUri == null && path != null) {
 
                     File src = new File(path);
                     dst = new File(getCacheDir() + "/" + src.getName());
@@ -612,11 +633,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            if (dst != null) {
 
-            Intent intent = new Intent(getApplicationContext(), ShowWebView.class);
-            intent.setAction(dst.getAbsolutePath());
-            startActivity(intent);
-
+                Intent intent = new Intent(getApplicationContext(), ShowWebView.class);
+                intent.setAction(dst.getAbsolutePath());
+                startActivity(intent);
+            }
         }
     }
 }

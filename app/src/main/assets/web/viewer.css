@@ -1292,13 +1292,14 @@ html[dir='rtl'] #findNext {
   display: inline-block;
   top: 4px;
   left: 7px;
+
 }
 
 html[dir="ltr"] .secondaryToolbarButton::before {
-  left: 4px;
+  left: 20px;
 }
 html[dir="rtl"] .secondaryToolbarButton::before {
-  right: 4px;
+  right: 20px;
 }
 
 html[dir='ltr'] .toolbarButton#sidebarToggle::before {

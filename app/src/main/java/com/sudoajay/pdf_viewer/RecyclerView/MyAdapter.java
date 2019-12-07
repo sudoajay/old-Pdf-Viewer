@@ -3,7 +3,7 @@ package com.sudoajay.pdf_viewer.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,7 +114,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        if (androidSdCardPermission.isSdStorageWritable()) {
+        if (androidSdCardPermission.isSdStorageWritable() || (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)) {
             return item.size();
         } else {
             return item.size() + 1;
@@ -123,7 +123,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
     @Override
     public int getItemViewType(int position) {
-        return (position == item.size()) ? R.layout.layout_scan_sdcard : R.layout.layout_recycler_view;
+        return (position == item.size() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) ? R.layout.layout_scan_sdcard : R.layout.layout_recycler_view;
     }
 
     public void transferItem(final ArrayList<String> value) {

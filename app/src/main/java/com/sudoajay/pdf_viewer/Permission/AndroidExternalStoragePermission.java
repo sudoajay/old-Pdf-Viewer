@@ -68,7 +68,7 @@ public class AndroidExternalStoragePermission {
                     Call_Custom_Permission_Dailog();
 
                 }
-            }, 1800);
+            }, 500);
         }
     }
 
