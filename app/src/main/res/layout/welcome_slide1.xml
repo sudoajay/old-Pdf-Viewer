@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_screen1">
@@ -19,8 +20,8 @@
         app:layout_constraintVertical_bias="0.547">
 
         <ImageView
-            android:layout_width="@dimen/welcomeSlide_imageView_size"
-            android:layout_height="@dimen/welcomeSlide_imageView_size"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:src="@mipmap/ic_launcher" />
 
         <TextView
@@ -29,17 +30,19 @@
             android:fontFamily="@font/lato"
             android:text="@string/slide_1_title"
             android:textColor="#c3000000"
-            android:textSize="30sp" />
+            android:textSize="30sp"
+            tools:ignore="UnusedAttribute" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/welcomeSlide_textView_marginTop"
+            android:layout_marginTop="10dp"
             android:fontFamily="@font/lato"
             android:text="@string/slide_1_desc"
             android:textAlignment="center"
             android:textColor="#be000000"
-            android:textSize="@dimen/welcomeSlide_textView_textSize" />
+            android:textSize="20sp"
+            tools:ignore="UnusedAttribute" />
 
     </LinearLayout>
 

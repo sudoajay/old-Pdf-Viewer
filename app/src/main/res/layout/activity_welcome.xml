@@ -15,9 +15,9 @@
     <LinearLayout
         android:id="@+id/layoutDots"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/layoutDots_height"
+        android:layout_height="30dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/layoutDots_marginBottom"
+        android:layout_marginBottom="20dp"
         android:gravity="center"
         android:orientation="horizontal"/>
 
@@ -37,7 +37,8 @@
         android:background="?selectableItemBackground"
         android:text="@string/next_text"
         android:textColor="#94000000"
-        android:textSize="@dimen/btn_next_textSize" />
+        android:textSize="16sp"
+        tools:ignore="RtlCompat" />
 
     <Button
         android:id="@+id/btn_skip"
@@ -48,6 +49,7 @@
         android:background="?selectableItemBackground"
         android:text="@string/skip_text"
         android:textColor="#94000000"
-        android:textSize="@dimen/btn_skip_textSize" />
+        android:textSize="16sp"
+        tools:ignore="RtlCompat" />
 
 </RelativeLayout>
