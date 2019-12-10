@@ -22,9 +22,9 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         handleIntent(getIntent());
 
         Reference();
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 //        Take Permission
         if (!androidExternalStoragePermission.isExternalStorageWritable()) {
             mBottomSheetDialog.show();
+            Toast.makeText(getApplicationContext(), "Its Here", Toast.LENGTH_LONG).show();
         } else {
             new MultiThreadingScanning().execute();
         }
@@ -162,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.e(TAG, "onCreateOptionsMenu: ");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
 
@@ -381,9 +384,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         sd_Card_Path_URL = Spilit_The_Path(string_URI, sd_Card_Path_URL);
 
         if (!isSelectSdRootDirectory(sd_Card_URL.toString()) || isSamePath(sd_Card_Path_URL)) {
+            Log.e(TAG, " --- got something");
             CustomToast.ToastIt(getApplicationContext(), getResources().getString(R.string.errorMes));
             return;
         }
+        Log.e(TAG, " --- got something");
         androidSdCardPermission.setSd_Card_Path_URL(sd_Card_Path_URL);
         androidSdCardPermission.setString_URI(string_URI);
 
@@ -392,8 +397,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             refreshList();
     }
 
-    private boolean isSamePath(String sd_Card_Path_URL) {
-        return androidExternalStoragePermission.getExternal_Path().equals(sd_Card_Path_URL);
+    private boolean isSamePath(final String sd_Card_Path_URL) {
+        return AndroidExternalStoragePermission.getExternalPath(getApplicationContext()).equals(sd_Card_Path_URL);
     }
 
     private boolean isSelectSdRootDirectory(String path) {
@@ -492,8 +497,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null) {
             fileUri = appLinkData;
+            new MultiThreadingCopying().execute();
         }
-        new MultiThreadingCopying().execute();
+
     }
 
 
@@ -548,7 +554,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         @Override
         protected String doInBackground(String... strings) {
-            scanPdf.scanFIle(MainActivity.this, androidExternalStoragePermission.getExternal_Path(), androidSdCardPermission.getSd_Card_Path_URL());
+            scanPdf.scanFIle(MainActivity.this, AndroidExternalStoragePermission.getExternalPath(getApplicationContext()), androidSdCardPermission.getSd_Card_Path_URL());
 
             return null;
         }
@@ -560,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             getPdfPath = scanPdf.getPdfPath();
 
             int type;
-            if (sort_date_optionMenu.isChecked()) type = 2;
+            if (sort_date_optionMenu == null || sort_date_optionMenu.isChecked()) type = 2;
             else if (sort_name_optionMenu.isChecked()) type = 1;
             else {
                 type = 3;
@@ -615,12 +621,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     dst = new File(getCacheDir() + "/" + src.getName());
 
 //                If file exist with same size
-                    if (!dst.exists())
+                    if (dst.exists()) dst.delete();
+
                         CopyFile.copy(src, dst);
 
                 } else {
                     dst = new File(getCacheDir() + "/" + queryName(getContentResolver(), fileUri));
-                    if (!dst.exists())
+
+                    if (dst.exists()) dst.delete();
+
                         CopyFile.copyUri(MainActivity.this, fileUri, dst);
                 }
             } catch (Exception ignored) {
@@ -633,6 +642,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            Log.e(TAG, "" + dst.getAbsolutePath());
             if (dst != null) {
 
                 Intent intent = new Intent(getApplicationContext(), ShowWebView.class);

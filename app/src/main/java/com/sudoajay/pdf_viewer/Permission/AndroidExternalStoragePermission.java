@@ -1,6 +1,7 @@
 package com.sudoajay.pdf_viewer.Permission;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -17,17 +18,17 @@ import androidx.core.app.ActivityCompat;
 
 import com.sudoajay.pdf_viewer.R;
 
+import java.util.Objects;
+
 
 public class AndroidExternalStoragePermission {
 
     private Context context;
     private Activity activity;
-    private String external_Path;
 
     public AndroidExternalStoragePermission(Context context, Activity activity) {
         this.context = context;
         this.activity = activity;
-        external_Path = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
 
@@ -111,7 +112,10 @@ public class AndroidExternalStoragePermission {
         return (res == PackageManager.PERMISSION_GRANTED);
     }
 
-    public String getExternal_Path() {
-        return external_Path;
+
+    public static String getExternalPath(final Context context){
+        String splitWord = "Android/data/";
+        @SuppressLint({"NewApi", "LocalSuppress"}) String[] cacheDir = Objects.requireNonNull(context.getExternalCacheDir()).getAbsolutePath().split(splitWord);
+        return  cacheDir[0];
     }
 }

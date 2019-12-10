@@ -3,6 +3,7 @@ package com.sudoajay.pdf_viewer.WebView;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -15,6 +16,7 @@ public class ShowWebView extends AppCompatActivity {
 
     private WebView myWebView;
     private String getPath;
+    private static final String TAG = "GotSomething";
 
     @SuppressLint({"WrongConstant", "SetJavaScriptEnabled"})
     @Override
@@ -25,6 +27,7 @@ public class ShowWebView extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             getPath = intent.getAction();
+            Log.e(TAG, "" + getPath);
         }
 
         setupWebView();

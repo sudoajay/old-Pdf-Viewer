@@ -4,17 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
-
-import com.sudoajay.pdf_viewer.MainActivity;
-import com.sudoajay.pdf_viewer.SdCard.SdCardDialog;
 import com.sudoajay.pdf_viewer.SharedPreference.SdCardPathSharedPreference;
 
 import java.io.File;
@@ -53,7 +45,7 @@ public class AndroidSdCardPermission {
         }
     }
 
-    public void Storage_Access_FrameWork() {
+    private void Storage_Access_FrameWork() {
         try {
             final Intent intent;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -70,18 +62,9 @@ public class AndroidSdCardPermission {
         }
     }
 
-    private void Call_Custom_Dailog_Changes() {
-        try {
-            FragmentTransaction ft = (((FragmentActivity) activity)).getSupportFragmentManager().beginTransaction();
-            SdCardDialog sd_card_dialog = new SdCardDialog(this);
-            sd_card_dialog.show(ft, "dialog");
-        } catch (Exception ignored) {
-
-        }
-    }
 
     public boolean isSdStorageWritable() {
-        return (!sd_Card_Path_URL.equals(Environment.getExternalStorageDirectory().getAbsolutePath()) &&
+        return (!sd_Card_Path_URL.equals(AndroidExternalStoragePermission.getExternalPath(context)) &&
                 new File(sd_Card_Path_URL).exists() && new File(sd_Card_Path_URL).listFiles() != null);
     }
 
@@ -100,11 +83,6 @@ public class AndroidSdCardPermission {
 
     public String getSd_Card_Path_URL() {
         return sd_Card_Path_URL;
-    }
-
-
-    public String getString_URI() {
-        return string_URI;
     }
 
     public void setSd_Card_Path_URL(String sd_Card_Path_URL) {

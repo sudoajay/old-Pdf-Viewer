@@ -1,32 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:showIn="@layout/activity_welcome">
+    android:layout_height="match_parent">
 
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.282">
+
+    </androidx.viewpager.widget.ViewPager>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/layoutDots"
+        android:alpha=".5"
+        android:background="#3c000000"
+        app:layout_constraintBottom_toTopOf="@+id/btn_next"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:id="@+id/layoutDots"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
         android:gravity="center"
-        android:orientation="horizontal"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_above="@id/layoutDots"
-        android:alpha=".5"
-        android:background="#3c000000" />
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/view"
+        tools:layout_editor_absoluteX="-16dp" />
 
     <Button
         android:id="@+id/btn_next"
@@ -38,6 +51,8 @@
         android:text="@string/next_text"
         android:textColor="#94000000"
         android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         tools:ignore="RtlCompat" />
 
     <Button
@@ -50,6 +65,8 @@
         android:text="@string/skip_text"
         android:textColor="#94000000"
         android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:ignore="RtlCompat" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

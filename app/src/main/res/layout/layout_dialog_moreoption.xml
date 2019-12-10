@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:tools="http://schemas.android.com/tools"
-    app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     android:id="@+id/fragment_history_menu_bottom"
     android:layout_width="match_parent"
     android:layout_height="180dp"
@@ -14,7 +14,6 @@
         android:layout_height="60dp"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
         android:padding="16dp"
         tools:ignore="UseCompoundDrawables">
@@ -32,7 +31,7 @@
             android:fontFamily="@font/lato"
             android:text="@string/option_openFile"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/bottomSheet_viewFolder"
@@ -40,7 +39,6 @@
         android:layout_height="60dp"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
         android:padding="16dp"
         tools:ignore="UseCompoundDrawables">
@@ -58,7 +56,7 @@
             android:fontFamily="@font/lato"
             android:text="@string/option_viewFolder"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/bottomSheet_moreInfo"
@@ -66,7 +64,6 @@
         android:layout_height="60dp"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
         android:orientation="horizontal"
         android:padding="16dp"
         tools:ignore="UseCompoundDrawables">
@@ -84,6 +81,7 @@
             android:fontFamily="@font/lato"
             android:text="@string/option_moreInfo"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginLeft="16dp" />
     </LinearLayout>
 </LinearLayout>
