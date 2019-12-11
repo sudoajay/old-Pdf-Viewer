@@ -1,4 +1,4 @@
-package com.sudoajay.pdf_viewer.SdCard;
+package com.sudoajay.pdf_viewer.sdCard;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -115,6 +115,5 @@ public final class SdCardPath {
             return File.separator;
         }
     }
-
 
 }

@@ -16,7 +16,7 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <activity
-            android:name=".IntroSceen.WelcomeActivity"
+            android:name=".introSceen.WelcomeActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -85,11 +85,11 @@
         </activity>
 
         <activity
-            android:name=".WebView.ShowWebView"
+            android:name=".webView.ShowWebView"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="InnerclassSeparator" />
         <activity
-            android:name=".SplashScreen.Splash"
+            android:name=".splashScreen.Splash"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="InnerclassSeparator" />
