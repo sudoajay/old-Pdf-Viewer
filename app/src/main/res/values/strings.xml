@@ -13,12 +13,12 @@
 
 
     <!--Slide Information-->
-    <string name="slide_1_title">Duplicate Data</string>
-    <string name="slide_1_desc">Scan And Remove The Duplicate Data</string>
-    <string name="slide_2_title">Background Timer</string>
-    <string name="slide_2_desc">Delete Duplicate Data Automatically</string>
-    <string name="slide_3_title">Storage Stats</string>
-    <string name="slide_3_desc">Storage Analysis &amp; Storage Stats</string>
+    <string name="slide_1_title">Support Storage</string>
+    <string name="slide_1_desc">Its support both internal &amp; sd-card </string>
+    <string name="slide_2_title">Sort Item</string>
+    <string name="slide_2_desc">It\'s helps in sort the item</string>
+    <string name="slide_3_title">Pdf viewer</string>
+    <string name="slide_3_desc">It\'s a advance pdf viewer</string>
 
     <!--    Bottom Sheet Dialog -->
     <string name="bottomSheetPermission_internal">Internal Permission</string>
@@ -74,10 +74,13 @@
     <string name="sort_size_optionMenu">By Size</string>
     <string name="refresh_optionMenu">Refresh</string>
     <string name="filePicker_optionMenu">File Picker</string>
+    <string name="clearCache_optionMenu">Clear Cache</string>
     <string name="more_optionMenu">More</string>
     <string name="more_sendFeedback_optionMenu">Send Feedback</string>
     <string name="more_rateUs_optionMenu">Rate Us</string>
     <string name="sort_shareApp_optionMenu">Share App</string>
     <string name="sort_aboutApp_optionMenu">About App</string>
+    <string name="welcome_slide_3_imageview">Welcome Slide 3 ImageView</string>
+    <string name="scan_sd_card_text">Scan Sd Card</string>
 
 </resources>

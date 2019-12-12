@@ -40,6 +40,9 @@
     <item
         android:id="@+id/filePicker_optionMenu"
         android:title="@string/filePicker_optionMenu" />
+    <item
+        android:id="@+id/clearCache_optionMenu"
+        android:title="@string/clearCache_optionMenu" />
 
     <item
         android:id="@+id/more_optionMenu"

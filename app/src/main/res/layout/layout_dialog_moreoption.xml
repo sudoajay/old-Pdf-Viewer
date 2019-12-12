@@ -81,7 +81,6 @@
             android:fontFamily="@font/lato"
             android:text="@string/option_moreInfo"
             android:textSize="15sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="16dp" />
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

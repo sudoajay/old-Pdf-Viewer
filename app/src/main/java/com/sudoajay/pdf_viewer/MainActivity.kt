@@ -34,6 +34,7 @@ import com.sudoajay.pdf_viewer.customDialog.DialogInformationData
 import com.sudoajay.pdf_viewer.databaseClasses.Database
 import com.sudoajay.pdf_viewer.helperClass.CopyFile
 import com.sudoajay.pdf_viewer.helperClass.CustomToast
+import com.sudoajay.pdf_viewer.helperClass.DeleteCache
 import com.sudoajay.pdf_viewer.helperClass.ScanPdf
 import com.sudoajay.pdf_viewer.permission.AndroidExternalStoragePermission
 import com.sudoajay.pdf_viewer.permission.AndroidSdCardPermission
@@ -189,6 +190,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
             R.id.more_rateUs_optionMenu -> rateUs()
             R.id.sort_shareApp_optionMenu -> shareIt()
             R.id.sort_aboutApp_optionMenu -> aboutApp()
+            R.id.clearCache_optionMenu -> DeleteCache.deleteCache(applicationContext)
             else -> return super.onOptionsItemSelected(item)
         }
         return true
