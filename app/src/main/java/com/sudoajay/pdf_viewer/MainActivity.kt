@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -40,6 +41,8 @@ import com.sudoajay.pdf_viewer.permission.AndroidExternalStoragePermission
 import com.sudoajay.pdf_viewer.permission.AndroidSdCardPermission
 import com.sudoajay.pdf_viewer.recyclerView.MyAdapter
 import com.sudoajay.pdf_viewer.sdCard.SdCardPath
+import com.sudoajay.pdf_viewer.sharedPreference.ExternalPathSharedPreference
+import com.sudoajay.pdf_viewer.sharedPreference.SdCardPathSharedPreference
 import com.sudoajay.pdf_viewer.webView.ShowWebView
 import java.io.File
 import java.util.*
@@ -48,6 +51,8 @@ import java.util.*
 class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListener, SearchView.OnQueryTextListener {
     private var androidExternalStoragePermission: AndroidExternalStoragePermission? = null
     private var androidSdCardPermission: AndroidSdCardPermission? = null
+    private var externalSharedPreferences: ExternalPathSharedPreference? = null
+    private var sdCardPathSharedPreference: SdCardPathSharedPreference? = null
     private var refreshImageView: ImageView? = null
     private var swipeToRefresh: SwipeRefreshLayout? = null
     private var getPdfPath = ArrayList<String>()
@@ -72,19 +77,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         setContentView(R.layout.activity_main)
         handleIntent(intent)
         reference()
+
         //        Take Permission
         if (!androidExternalStoragePermission!!.isExternalStorageWritable) {
             mBottomSheetDialog!!.show()
         } else {
             MultiThreadingScanning().execute()
-        }
-
-    }
-
-    fun sendSdCardPermission() {
-        if (!androidSdCardPermission!!.isSdStorageWritable) {
-            CustomToast.toastIt(applicationContext, "Select the SD Card Root Path")
-            androidSdCardPermission!!.callThread()
         }
     }
 
@@ -97,12 +95,15 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
         swipeToRefresh?.setColorSchemeColors(ContextCompat.getColor(applicationContext, R.color.colorPrimary))
 
+
         setSupportActionBar(toolbar)
         swipeToRefresh?.setOnRefreshListener(this)
         // create object
         database = Database(applicationContext)
         androidExternalStoragePermission = AndroidExternalStoragePermission(this@MainActivity, this@MainActivity)
         androidSdCardPermission = AndroidSdCardPermission(applicationContext, this@MainActivity)
+        externalSharedPreferences = ExternalPathSharedPreference(applicationContext)
+        sdCardPathSharedPreference = SdCardPathSharedPreference(applicationContext)
         //         Select Option
         mBottomSheetDialog = BottomSheetDialog(this@MainActivity)
         @SuppressLint("InflateParams") val sheetView = layoutInflater.inflate(R.layout.layout_dialog_selectoption, null)
@@ -133,6 +134,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         recyclerView!!.layoutManager = layoutManager
         // specify an adapter (see also next example)
 
+        getPdfPath.forEach { item ->
+            CustomToast.toastIt(applicationContext, item)
+        }
 
         mAdapter = MyAdapter(this@MainActivity, ArrayList(getPdfPath))
         recyclerView!!.adapter = mAdapter
@@ -282,7 +286,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
             if (!(grantResults.isNotEmpty()
                             && grantResults[0] == PackageManager.PERMISSION_GRANTED)) { // permission denied, boo! Disable the
 // functionality that depends on this permission.
-//                CustomToast.ToastIt(MainActivity.this, "Give us permission for further process ");
+                CustomToast.toastIt(applicationContext, getString(R.string.giveUsPermission))
                 mBottomSheetDialog!!.show()
                 //                if (!androidExternalStoragePermission.isExternalStorageWritable())
 //                    androidExternalStoragePermission.call_Thread();
@@ -296,41 +300,70 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) { // local variable
         super.onActivityResult(requestCode, resultCode, data)
-        var sdCardPathURL: String?
+        val sdCardPathURL: String?
         val stringURI: String
+        val spiltPart: String?
+        if (resultCode != Activity.RESULT_OK) return
+
         if (this.requestCode == requestCode && data != null) {
             fileUri = data.data
             MultiThreadingCopying().execute()
             return
+        } else if (requestCode == 42 || requestCode == 58) {
+            val sdCardURL: Uri? = data!!.data
+            grantUriPermission(this@MainActivity.packageName, sdCardURL, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            this@MainActivity.contentResolver.takePersistableUriPermission(sdCardURL!!, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+            sdCardPathURL = SdCardPath.getFullPathFromTreeUri(sdCardURL, this@MainActivity)
+            stringURI = sdCardURL.toString()
+
+
+//             Its supports till android 9 & api
+            if (requestCode == 42) {
+                 spiltPart = "%3A"
+                sdCardPathSharedPreference!!.sdCardPath = spiltThePath(stringURI, sdCardPathURL)
+                sdCardPathSharedPreference!!.stringURI = spiltUri(stringURI,spiltPart)
+                if (!androidSdCardPermission!!.isSdStorageWritable) {
+                    CustomToast.toastIt(applicationContext, resources.getString(R.string.errorMesSdCard))
+                    return
+                }
+
+            } else {
+                val realExternalPath = androidExternalStoragePermission?.getExternalPath().toString()
+                if (realExternalPath in sdCardPathURL.toString() + "/") {
+                    spiltPart = "primary%3A"
+                    externalSharedPreferences!!.sdCardPath = realExternalPath
+                    externalSharedPreferences!!.stringURI = spiltUri(stringURI,spiltPart)
+                } else {
+                    CustomToast.toastIt(applicationContext, getString(R.string.errorMesExternal))
+                    mBottomSheetDialog!!.show()
+                    return
+                }
+
+
+            }
+            // refresh when you get sd card path & External Path
+            refreshList()
+        } else {
+            CustomToast.toastIt(applicationContext, getString(R.string.reportIt))
         }
-        if (resultCode != Activity.RESULT_OK) return
-        val sdCardURL: Uri? = data!!.data
-        grantUriPermission(this@MainActivity.packageName, sdCardURL, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        assert(sdCardURL != null)
-        this@MainActivity.contentResolver.takePersistableUriPermission(sdCardURL!!, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-        sdCardPathURL = SdCardPath.getFullPathFromTreeUri(sdCardURL, this@MainActivity)
-        stringURI = sdCardURL.toString()
-        assert(sdCardPathURL != null)
-        sdCardPathURL = spilitThePath(stringURI, sdCardPathURL)
-
-        androidSdCardPermission!!.setSdCardPathURL(sdCardPathURL)
-        androidSdCardPermission!!.setStringURI(stringURI)
-
-        if (!androidSdCardPermission!!.isSdStorageWritable) {
-            CustomToast.toastIt(applicationContext, resources.getString(R.string.errorMes))
-            return
-        }
-        // refresh when you get sd card path
-        refreshList()
     }
 
+    private fun spiltUri(uri:String, spiltPart:String) :String {
+        return uri.split(spiltPart)[0] + spiltPart
+    }
 
-    private fun spilitThePath(url: String, path: String?): String {
+    private fun spiltThePath(url: String, path: String?): String {
         val spilt = url.split("%3A").toTypedArray()
         val getPaths = spilt[0].split("/").toTypedArray()
         val paths = path!!.split(getPaths[getPaths.size - 1]).toTypedArray()
-        return paths[0] + getPaths[getPaths.size - 1]
+        return paths[0] + getPaths[getPaths.size - 1]+"/"
+
+    }
+
+    fun sendSdCardPermission() {
+        if (!androidSdCardPermission!!.isSdStorageWritable) androidSdCardPermission!!.callThread()
+
     }
 
     @SuppressLint("Recycle")
@@ -440,7 +473,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         }
 
         override fun doInBackground(vararg params: String?): String? {
-            scanPdf!!.scanFIle(this@MainActivity, AndroidExternalStoragePermission.getExternalPath(applicationContext), androidSdCardPermission!!.getSdCardPathURL())
+            scanPdf!!.scanFIle(this@MainActivity, androidExternalStoragePermission?.getExternalPath(), androidSdCardPermission!!.getSdCardPathURL())
             return null
         }
 

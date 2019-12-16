@@ -28,7 +28,11 @@
 
     <!--Sd Card Path SharedPreference-->
     <string name="sdCardPath">Sd Card Path</string>
-    <string name="stringUri">String URI</string>
+    <string name="sdCardStringUri"> Sd Card String URI</string>
+
+    <!--External Storage Path SharedPreference-->
+    <string name="externalPath">External Path</string>
+    <string name="externalStringUri"> External String URI</string>
 
     <!--Custom Dialog SD Card Permission-->
     <string name="SdCardTextView">Select Sd Card</string>
@@ -45,7 +49,8 @@
     <!--share app-->
     <string name="share_info">Hey, check This App which helps you to Delete Duplicate and Unnecessary Data from the phone -</string>
 
-    <string name="errorMes">Please Select the Sd Card Root Directory</string>
+    <string name="errorMesSdCard">Please Select the Sd Card Directory</string>
+    <string name="errorMesExternal">Please Select the Internal Card Directory</string>
 
     <!--    BottomSheetDialog more option-->
     <string name="option_openFile">Open File</string>
@@ -82,5 +87,7 @@
     <string name="sort_aboutApp_optionMenu">About App</string>
     <string name="welcome_slide_3_imageview">Welcome Slide 3 ImageView</string>
     <string name="scan_sd_card_text">Scan Sd Card</string>
+    <string name="reportIt">There is Error Please Report It</string>
+    <string name="giveUsPermission">Give us permission for further process</string>
 
 </resources>

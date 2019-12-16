@@ -10,15 +10,47 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.widget.Button
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.documentfile.provider.DocumentFile
 import com.sudoajay.pdf_viewer.R
+import com.sudoajay.pdf_viewer.helperClass.CustomToast
+import com.sudoajay.pdf_viewer.sharedPreference.ExternalPathSharedPreference
+import com.sudoajay.pdf_viewer.sharedPreference.SdCardPathSharedPreference
+import java.io.File
 
-@Suppress("ControlFlowWithEmptyBody")
-class AndroidExternalStoragePermission(private val context: Context, private val activity: Activity) {
+@Suppress("ControlFlowWithEmptyBody", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+class AndroidExternalStoragePermission {
+    private var context: Context
+    private var activity: Activity? = null
+    private var externalSharedPreferences: ExternalPathSharedPreference? = null
+    private var sdCardPathSharedPreference: SdCardPathSharedPreference? = null
+
+
+    constructor(context: Context, activity: Activity?) {
+        this.context = context
+        this.activity = activity
+        initialize()
+    }
+
+    constructor(context: Context) {
+        this.context = context
+        initialize()
+
+    }
+
+    fun initialize(){
+        externalSharedPreferences = ExternalPathSharedPreference(context)
+        sdCardPathSharedPreference = SdCardPathSharedPreference(context)
+
+    }
+
     private fun storagePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
-            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    1)
+            activity?.let {
+                ActivityCompat.requestPermissions(it, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        1)
+            }
             //                if (ContextCompat.checkSelfPermission(context,
 //                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 //                    int my_Permission_Request = 1;
@@ -39,12 +71,21 @@ class AndroidExternalStoragePermission(private val context: Context, private val
 
     fun callThread() { // check if permission already given or not
         if (!isExternalStorageWritable) {
-            val handler = Handler()
-            handler.postDelayed({ callCustomPermissionDailog() }, 500)
+//             Its supports till android 9 & api 28
+            if (Build.VERSION.SDK_INT <= 22) {
+                val handler = Handler()
+                handler.postDelayed({ callCustomPermissionDialog() }, 500)
+            } else {
+                val handler = Handler()
+                handler.postDelayed({
+                    CustomToast.toastIt(context, context.getString(R.string.errorMesExternal))
+
+                    storageAccessFrameWork() }, 500)
+            }
         }
     }
 
-    private fun callCustomPermissionDailog() {
+    private fun callCustomPermissionDialog() {
         val dialog = Dialog(context)
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.activity_custom_dialog_permission)
@@ -56,7 +97,7 @@ class AndroidExternalStoragePermission(private val context: Context, private val
                 val url = "https://developer.android.com/training/permissions/requesting.html"
                 val i = Intent(Intent.ACTION_VIEW)
                 i.data = Uri.parse(url)
-                activity.startActivity(i)
+                activity?.startActivity(i)
             } catch (ignored: Exception) {
             }
         }
@@ -69,18 +110,45 @@ class AndroidExternalStoragePermission(private val context: Context, private val
 
     val isExternalStorageWritable: Boolean
         get() {
-            val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
-            val res = activity.checkCallingOrSelfPermission(permission)
-            return res == PackageManager.PERMISSION_GRANTED
-        }
+            //             Its supports till android 9
+            return when {
+                Build.VERSION.SDK_INT <= 22 -> {
+                    val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    val res = activity?.checkCallingOrSelfPermission(permission)
+                    res == PackageManager.PERMISSION_GRANTED
+                }
 
-    companion object {
-        @JvmStatic
-        fun getExternalPath(context: Context): String? {
-            val splitWord = "Android/data/"
-            val cacheDir = (context.externalCacheDir?.absolutePath)?.split(splitWord)?.toTypedArray()
-            return cacheDir?.get(0)
+                else -> (externalSharedPreferences!!.stringURI!!.isNotEmpty() && DocumentFile.fromTreeUri(context, Uri.parse(externalSharedPreferences!!.stringURI))!!.exists() )
+                        && isSameUri
+            }
+
+        }
+    private val isSameUri
+        get()= externalSharedPreferences!!.stringURI!!.isNotEmpty() && sdCardPathSharedPreference!!.stringURI!!.isNotEmpty() &&
+                !externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
+
+    private fun storageAccessFrameWork() {
+        try {
+            val intent: Intent
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                val requestCode = 58
+                activity?.startActivityForResult(intent, requestCode)
+            }
+        } catch (e: Exception) {
+            CustomToast.toastIt(context,context.getString(R.string.reportIt))
+
         }
     }
+
+
+    fun getExternalPath(): String? {
+            //  Its supports till android 9
+            val splitWord = "Android/data/"
+            val cacheDir = (context.externalCacheDir?.absolutePath)?.split(splitWord)?.toTypedArray()
+        return   cacheDir?.get(0)
+
+    }
+
 
 }

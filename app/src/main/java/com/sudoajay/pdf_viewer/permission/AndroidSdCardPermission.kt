@@ -4,20 +4,27 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.widget.Toast
-import com.sudoajay.pdf_viewer.permission.AndroidExternalStoragePermission.Companion.getExternalPath
+import androidx.documentfile.provider.DocumentFile
+import com.sudoajay.pdf_viewer.R
+import com.sudoajay.pdf_viewer.helperClass.CustomToast
+import com.sudoajay.pdf_viewer.sharedPreference.ExternalPathSharedPreference
 import com.sudoajay.pdf_viewer.sharedPreference.SdCardPathSharedPreference
 import java.io.File
 
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 @SuppressLint("Registered")
 class AndroidSdCardPermission {
     private var context: Context
+    private var activity: Activity? = null
     private var sdCardPathURL: String? = ""
     private var stringURI: String? = null
     private var sdCardPathSharedPreference: SdCardPathSharedPreference? = null
-    private var activity: Activity? = null
+    private var externalSharedPreferences :ExternalPathSharedPreference? =null
+
 
     constructor(context: Context, activity: Activity?) {
         this.context = context
@@ -33,7 +40,10 @@ class AndroidSdCardPermission {
     fun callThread() {
         if (!isSdStorageWritable) {
             val handler = Handler()
-            handler.postDelayed({ storageAccessFrameWork() }, 1800)
+            handler.postDelayed({
+                CustomToast.toastIt(context, context.getString(R.string.errorMesSdCard))
+                storageAccessFrameWork()
+            }, 500)
         }
     }
 
@@ -51,29 +61,36 @@ class AndroidSdCardPermission {
     }
 
     val isSdStorageWritable: Boolean
-        get() = sdCardPathURL != getExternalPath(context) &&
-                File(sdCardPathURL).exists() && File(sdCardPathURL).listFiles() != null
+        get() {
+            return when {
+                Build.VERSION.SDK_INT <= 22 ->{
+                     File(sdCardPathURL).exists() || isSameUri
+                }
+                else -> ( sdCardPathSharedPreference!!.stringURI!!.isNotEmpty()
+                        && DocumentFile.fromTreeUri(context, Uri.parse(sdCardPathSharedPreference!!.stringURI))!!.exists())
+                        || isSameUri
+            }
+        }
+
+    private val isSameUri
+        get()= externalSharedPreferences!!.stringURI!!.isNotEmpty() && sdCardPathSharedPreference!!.stringURI!!.isNotEmpty() &&
+                !externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
+
 
     private fun grab() { // gran the data from shared preference
         sdCardPathSharedPreference = SdCardPathSharedPreference(context)
+        externalSharedPreferences = ExternalPathSharedPreference(context)
+
         try {
             sdCardPathURL = sdCardPathSharedPreference!!.sdCardPath
             stringURI = sdCardPathSharedPreference!!.stringURI
+
         } catch (ignored: Exception) {
         }
     }
 
     fun getSdCardPathURL(): String? {
-        return sdCardPathURL
+        return sdCardPathSharedPreference!!.sdCardPath
     }
 
-    fun setSdCardPathURL(sd_Card_Path_URL: String?) {
-        this.sdCardPathURL = sd_Card_Path_URL
-        sdCardPathSharedPreference!!.sdCardPath = sd_Card_Path_URL
-    }
-
-    fun setStringURI(string_URI: String?) {
-        this.stringURI = string_URI
-        sdCardPathSharedPreference!!.stringURI = string_URI
-    }
 }
