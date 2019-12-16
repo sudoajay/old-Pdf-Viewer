@@ -7,13 +7,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
-import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Handler
-import android.os.StrictMode
+import android.os.*
 import android.os.StrictMode.VmPolicy
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -410,7 +406,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
     }
 
     private fun specificFolder() {
-        val getPath = path?.replace("/" + File(path).name, "")
+        val getPath: String? = if (!path!!.startsWith("content:")) {
+            path?.replace("/" + File(path).name, "")
+        } else {
+            path
+        }
         val selectedUri = Uri.parse(getPath)
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setDataAndType(selectedUri, "resource/folder")
@@ -421,7 +421,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         }
     }
 
-    private fun handleIntent(intent: Intent) { //Kinda not recommended by google but watever
+    private fun handleIntent(intent: Intent) { //Kinda not recommended by google but whatever
         val builder = VmPolicy.Builder()
         StrictMode.setVmPolicy(builder.build())
         val appLinkData = intent.data
@@ -434,7 +434,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
     private fun dialogInformationData() {
         val ft = supportFragmentManager.beginTransaction()
-        path?.let { DialogInformationData(it, this@MainActivity) }?.show(ft, "dialog")
+        DialogInformationData(path.toString(), this@MainActivity).show(ft, "dialog")
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
@@ -454,12 +454,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 //        if (cursor != null && cursor.moveToFirst()) {
 //            cursor.moveToFirst()
 //            size = cursor.getString(0).toInt()
-//            //            Log.e(TAG, "" + size);
+
 //        }
 //    }
 
     private fun clearDataBaseItem() {
         if (!database!!.isEmpty) database!!.deleteData()
+
     }
 
 
@@ -469,11 +470,18 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         override fun onPreExecute() {
             loadingAnimation!!.start()
             getPdfPath.clear()
+            // Empty If the database have something
+            if (!database!!.isEmpty) database!!.deleteData()
             scanPdf = ScanPdf()
         }
 
         override fun doInBackground(vararg params: String?): String? {
-            scanPdf!!.scanFIle(this@MainActivity, androidExternalStoragePermission?.getExternalPath(), androidSdCardPermission!!.getSdCardPathURL())
+            //             Its supports till android 9 & api 28
+            if (Build.VERSION.SDK_INT <= 22) {
+                scanPdf!!.scanFIle(this@MainActivity, androidExternalStoragePermission?.getExternalPath(), androidSdCardPermission!!.getSdCardPathURL())
+            } else {
+                scanPdf?.scanFile(this@MainActivity)
+            }
             return null
         }
 
@@ -505,6 +513,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         override fun onPreExecute() {}
         override fun doInBackground(vararg params: String?): String? {
             try {
+                if (path!!.startsWith("content:")) {
+                    fileUri = Uri.parse(path)
+                }
                 if (fileUri == null && path != null) {
                     val src = File(path)
                     dst = File(cacheDir.toString() + "/" + src.name)

@@ -1,14 +1,19 @@
 package com.sudoajay.pdf_viewer.recyclerView
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.RecyclerView
 import com.sudoajay.pdf_viewer.MainActivity
 import com.sudoajay.pdf_viewer.R
+import com.sudoajay.pdf_viewer.R.layout.layout_recycler_view
+import com.sudoajay.pdf_viewer.R.layout.layout_scan_sdcard
 import com.sudoajay.pdf_viewer.databaseClasses.Database
 import com.sudoajay.pdf_viewer.helperClass.FileSize.convertIt
 import com.sudoajay.pdf_viewer.permission.AndroidSdCardPermission
@@ -39,10 +44,10 @@ class MyAdapter(mainActivity: MainActivity, item: ArrayList<String>) : RecyclerV
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): MyViewHolder {
-        val listItem: View = if (viewType == R.layout.layout_recycler_view) {
-            LayoutInflater.from(parent.context).inflate(R.layout.layout_recycler_view, parent, false)
+        val listItem: View = if (viewType == layout_recycler_view) {
+            LayoutInflater.from(parent.context).inflate(layout_recycler_view, parent, false)
         } else {
-            LayoutInflater.from(parent.context).inflate(R.layout.layout_scan_sdcard, parent, false)
+            LayoutInflater.from(parent.context).inflate(layout_scan_sdcard, parent, false)
         }
         return MyViewHolder(listItem)
     }
@@ -51,12 +56,24 @@ class MyAdapter(mainActivity: MainActivity, item: ArrayList<String>) : RecyclerV
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) { // - get element from your dataset at this position
 // - replace the contents of the view with that element
+        @SuppressLint("SimpleDateFormat") val sdf = SimpleDateFormat(" , d MMM yyyy , h:mm a")
         if (position < item.size) {
-            val file = File(item[position])
-            holder.nameTextView!!.text = file.name
-            @SuppressLint("SimpleDateFormat") val sdf = SimpleDateFormat(" , d MMM yyyy , h:mm a")
-            holder.infoTextView!!.text = convertIt(file.length()) + sdf.format(file.lastModified())
+            if (!item[position].startsWith("content:")) {
+                val file = File(item[position])
+                holder.nameTextView!!.text = file.name
+                holder.infoTextView!!.text = convertIt(file.length()) + sdf.format(file.lastModified())
+
+            } else {
+                val documentFile: DocumentFile? = DocumentFile.fromSingleUri(mainActivity, Uri.parse(item[position]))
+                documentFile!!.lastModified()
+                holder.nameTextView!!.text = documentFile.name
+                holder.infoTextView!!.text = convertIt(documentFile.length()) + sdf.format(documentFile.lastModified())
+            }
+
+
             holder.coverImageView!!.setImageResource(R.drawable.pdf_icon)
+
+
             holder.moreOptionImageView!!.setOnClickListener { mainActivity.openMoreOption(position) }
             holder.nameTextView!!.setOnClickListener { mainActivity.openPdf(position) }
             holder.infoTextView!!.setOnClickListener { mainActivity.openPdf(position) }
@@ -76,7 +93,7 @@ class MyAdapter(mainActivity: MainActivity, item: ArrayList<String>) : RecyclerV
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == item.size && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) R.layout.layout_scan_sdcard else R.layout.layout_recycler_view
+        return if (position == item.size && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) layout_scan_sdcard else layout_recycler_view
     }
 
     fun transferItem(value: ArrayList<String>) {

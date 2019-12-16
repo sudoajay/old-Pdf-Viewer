@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -13,10 +14,12 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import com.sudoajay.pdf_viewer.MainActivity
 import com.sudoajay.pdf_viewer.R
 import com.sudoajay.pdf_viewer.helperClass.FileSize.convertIt
+import com.sudoajay.pdf_viewer.helperClass.FileUtils
 import java.io.File
 import java.text.SimpleDateFormat
 
@@ -60,24 +63,46 @@ class DialogInformationData(private val path: String, private val mainActivity: 
 
     @SuppressLint("SetTextI18n")
     private fun fillIt() {
-        val filePath = File(path)
-        infoNameTextView!!.text = filePath.name
-        val extactPath = path.replace(filePath.name, "")
-        infoLocationTextView!!.text = extactPath
-        infoSizeTextView!!.text = convertIt(filePath.length())
-        if (filePath.isDirectory) {
-            infoTypeTextView!!.text = "Folder"
-        } else {
-            infoTypeTextView!!.text = "application/pdf"
-        }
-        val fileName = filePath.name
-        val i = fileName.lastIndexOf('.')
-        val p = fileName.lastIndexOf('/').coerceAtLeast(fileName.lastIndexOf('\\'))
-        if (i > p) {
-            infoExtTextView!!.text = fileName.substring(i + 1)
-        }
         @SuppressLint("SimpleDateFormat") val sdf = SimpleDateFormat("d MMM yyyy , h:mm a")
-        infoCreatedTextView!!.text = sdf.format(filePath.lastModified())
+        if (!path.startsWith("content:")) {
+            val filePath = File(this.path)
+            infoNameTextView!!.text = filePath.name
+            val exactPath: String = path.replace(filePath.name, "")
+            infoLocationTextView!!.text = exactPath
+            infoSizeTextView!!.text = convertIt(filePath.length())
+            if (filePath.isDirectory) {
+                infoTypeTextView!!.text = "Folder"
+            } else {
+                infoTypeTextView!!.text = "application/pdf"
+            }
+            val fileName = filePath.name
+            val i = fileName.lastIndexOf('.')
+            val p = fileName.lastIndexOf('/').coerceAtLeast(fileName.lastIndexOf('\\'))
+            if (i > p) {
+                infoExtTextView!!.text = fileName.substring(i + 1)
+            }
+            infoCreatedTextView!!.text = sdf.format(filePath.lastModified())
+        } else {
+            val documentFile = DocumentFile.fromSingleUri(mainActivity, Uri.parse(path))
+            infoNameTextView!!.text = documentFile!!.name
+            val exactPath = FileUtils.getPath(context, Uri.parse(path)).replace(documentFile.name!!, "")
+            infoLocationTextView!!.text = exactPath
+            infoSizeTextView!!.text = convertIt(documentFile.length())
+            if (documentFile.isDirectory) {
+                infoTypeTextView!!.text = "Folder"
+            } else {
+                infoTypeTextView!!.text = "application/pdf"
+            }
+            val fileName = documentFile.name
+            val i = fileName?.lastIndexOf('.')
+            val p = fileName?.lastIndexOf('/')?.coerceAtLeast(fileName.lastIndexOf('\\'))
+            if (i!! > p!!) {
+                infoExtTextView!!.text = fileName.substring(i + 1)
+            }
+            infoCreatedTextView!!.text = sdf.format(documentFile.lastModified())
+        }
+
+
     }
 
     override fun onStart() { // This MUST be called first! Otherwise the view tweaking will not be present in the displayed Dialog (most likely overriden)

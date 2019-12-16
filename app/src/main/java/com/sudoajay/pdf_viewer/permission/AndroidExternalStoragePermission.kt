@@ -10,40 +10,18 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.widget.Button
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import com.sudoajay.pdf_viewer.R
 import com.sudoajay.pdf_viewer.helperClass.CustomToast
 import com.sudoajay.pdf_viewer.sharedPreference.ExternalPathSharedPreference
 import com.sudoajay.pdf_viewer.sharedPreference.SdCardPathSharedPreference
-import java.io.File
 
 @Suppress("ControlFlowWithEmptyBody", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-class AndroidExternalStoragePermission {
-    private var context: Context
-    private var activity: Activity? = null
+class AndroidExternalStoragePermission(private var context: Context, private var activity: Activity?) {
     private var externalSharedPreferences: ExternalPathSharedPreference? = null
     private var sdCardPathSharedPreference: SdCardPathSharedPreference? = null
 
-
-    constructor(context: Context, activity: Activity?) {
-        this.context = context
-        this.activity = activity
-        initialize()
-    }
-
-    constructor(context: Context) {
-        this.context = context
-        initialize()
-
-    }
-
-    fun initialize(){
-        externalSharedPreferences = ExternalPathSharedPreference(context)
-        sdCardPathSharedPreference = SdCardPathSharedPreference(context)
-
-    }
 
     private fun storagePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
@@ -110,8 +88,9 @@ class AndroidExternalStoragePermission {
 
     val isExternalStorageWritable: Boolean
         get() {
-            //             Its supports till android 9
+            //
             return when {
+//                Its supports till android 9
                 Build.VERSION.SDK_INT <= 22 -> {
                     val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
                     val res = activity?.checkCallingOrSelfPermission(permission)
@@ -148,6 +127,11 @@ class AndroidExternalStoragePermission {
             val cacheDir = (context.externalCacheDir?.absolutePath)?.split(splitWord)?.toTypedArray()
         return   cacheDir?.get(0)
 
+    }
+
+    init {
+        externalSharedPreferences = ExternalPathSharedPreference(context)
+        sdCardPathSharedPreference = SdCardPathSharedPreference(context)
     }
 
 
