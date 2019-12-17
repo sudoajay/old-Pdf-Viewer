@@ -141,15 +141,7 @@ class DialogInformationData(private val path: String, private val mainActivity: 
             }
             R.id.cancel_Button, R.id.close_ImageView -> dismiss()
         }
-    } //    private static String getMimeType(String url) {
-
-    //        String type = null;
-//        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-//        if (extension != null) {
-//            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-//        }
-//        return type;
-//    }
+    }
     init {
         activity = mainActivity
     }

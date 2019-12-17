@@ -17,8 +17,8 @@
     <string name="slide_1_desc">Its support both internal &amp; sd-card </string>
     <string name="slide_2_title">Support Offline </string>
     <string name="slide_2_desc">There is no need for internet</string>
-    <string name="slide_3_title">Pdf viewer</string>
-    <string name="slide_3_desc">It\'s a advance pdf viewer</string>
+    <string name="slide_3_title">Advance Feature</string>
+    <string name="slide_3_desc">It\'s an advance pdf viewer</string>
 
     <!--    Bottom Sheet Dialog -->
     <string name="bottomSheetPermission_internal">Internal Permission</string>
