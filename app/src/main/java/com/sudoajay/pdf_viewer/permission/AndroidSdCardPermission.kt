@@ -66,15 +66,16 @@ class AndroidSdCardPermission {
                 Build.VERSION.SDK_INT <= 22 ->{
                      File(sdCardPathURL).exists() || isSameUri
                 }
-                else -> ( sdCardPathSharedPreference!!.stringURI!!.isNotEmpty()
-                        && DocumentFile.fromTreeUri(context, Uri.parse(sdCardPathSharedPreference!!.stringURI))!!.exists())
-                        || isSameUri
+                else -> {
+                    ((sdCardPathSharedPreference!!.stringURI!!.isNotEmpty() && Uri.parse(sdCardPathSharedPreference!!.stringURI).isAbsolute
+                            && DocumentFile.fromTreeUri(context, Uri.parse(sdCardPathSharedPreference!!.stringURI))!!.exists() && !isSameUri))
+                }
             }
         }
 
     private val isSameUri
-        get()= externalSharedPreferences!!.stringURI!!.isNotEmpty() && sdCardPathSharedPreference!!.stringURI!!.isNotEmpty() &&
-                !externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
+        get() = externalSharedPreferences!!.stringURI!!.isEmpty() && sdCardPathSharedPreference!!.stringURI!!.isEmpty() &&
+                externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
 
 
     private fun grab() { // gran the data from shared preference

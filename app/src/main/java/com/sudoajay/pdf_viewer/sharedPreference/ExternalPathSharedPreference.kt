@@ -12,7 +12,7 @@ class ExternalPathSharedPreference @SuppressLint("CommitPrefEdits") constructor(
     private val context: Context
     private val pref: SharedPreferences = context.getSharedPreferences(context.getString(R.string.MY_PREFS_NAME), Context.MODE_PRIVATE)
     // send thd data to shared preferences
-    var sdCardPath: String?
+    var externalPath: String?
         get() = pref.getString(context.getString(R.string.externalPath), "")
         set(sdCardPath) { // send thd data to shared preferences
             editor.putString(context.getString(R.string.externalPath), sdCardPath)

@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -130,10 +131,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         recyclerView!!.layoutManager = layoutManager
         // specify an adapter (see also next example)
 
-        getPdfPath.forEach { item ->
-            CustomToast.toastIt(applicationContext, item)
-        }
-
         mAdapter = MyAdapter(this@MainActivity, ArrayList(getPdfPath))
         recyclerView!!.adapter = mAdapter
         recyclerView!!.invalidate()
@@ -151,11 +148,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         searchView.setOnQueryTextListener(this)
         menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
-                clearDataBaseItem()
-                for (get in getPdfPath) {
-                    val file = File(get)
-                    database!!.fill(file.name, get, file.length(), file.lastModified())
-                }
+                saveToData()
                 return true
             }
 
@@ -197,11 +190,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
     }
 
     private fun sortingResult(type: Int) {
-        clearDataBaseItem()
-        for (get in getPdfPath) {
-            val file = File(get)
-            database!!.fill(file.name, get, file.length(), file.lastModified())
-        }
+        saveToData()
         getPdfPath.clear()
         if (!database!!.isEmpty) {
             val cursor: Cursor? = when (type) {
@@ -219,6 +208,18 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         }
     }
 
+    private fun saveToData(){
+        clearDataBaseItem()
+        for (get in getPdfPath) {
+            if (!get.startsWith("content:")) {
+                val file = File(get)
+                database!!.fill(file.name, get, file.length(), file.lastModified())
+            } else {
+                val documentFile = DocumentFile.fromSingleUri(applicationContext, Uri.parse(get))
+                database!!.fill(documentFile!!.name, get, documentFile.length(), documentFile.lastModified())
+            }
+        }
+    }
     fun onClickItem(view: View) {
         if (view.id == R.id.refresh_imageView) {
             if (refreshImageView != null && refreshImageView!!.rotation % 360 == 0f) {
@@ -325,10 +326,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
                 }
 
             } else {
-                val realExternalPath = androidExternalStoragePermission?.getExternalPath().toString()
+                val realExternalPath = AndroidExternalStoragePermission.getExternalPath(applicationContext).toString()
                 if (realExternalPath in sdCardPathURL.toString() + "/") {
                     spiltPart = "primary%3A"
-                    externalSharedPreferences!!.sdCardPath = realExternalPath
+                    externalSharedPreferences!!.externalPath = realExternalPath
                     externalSharedPreferences!!.stringURI = spiltUri(stringURI,spiltPart)
                 } else {
                     CustomToast.toastIt(applicationContext, getString(R.string.errorMesExternal))
@@ -478,7 +479,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         override fun doInBackground(vararg params: String?): String? {
             //             Its supports till android 9 & api 28
             if (Build.VERSION.SDK_INT <= 22) {
-                scanPdf!!.scanFIle(this@MainActivity, androidExternalStoragePermission?.getExternalPath(), androidSdCardPermission!!.getSdCardPathURL())
+                scanPdf!!.scanFIle(this@MainActivity, AndroidExternalStoragePermission.getExternalPath(applicationContext), androidSdCardPermission!!.getSdCardPathURL())
             } else {
                 scanPdf?.scanFile(this@MainActivity)
             }

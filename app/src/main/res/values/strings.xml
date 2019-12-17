@@ -49,8 +49,8 @@
     <!--share app-->
     <string name="share_info">Hey, check This App which helps you to Delete Duplicate and Unnecessary Data from the phone -</string>
 
-    <string name="errorMesSdCard">Please Select the Sd Card Directory</string>
-    <string name="errorMesExternal">Please Select the Internal Card Directory</string>
+    <string name="errorMesSdCard">Only Select the Sd Card Directory</string>
+    <string name="errorMesExternal">Only Select the Internal Card Directory</string>
 
     <!--    BottomSheetDialog more option-->
     <string name="option_openFile">Open File</string>

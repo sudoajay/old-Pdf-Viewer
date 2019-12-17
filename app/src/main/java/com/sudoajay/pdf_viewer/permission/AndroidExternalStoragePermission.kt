@@ -97,14 +97,17 @@ class AndroidExternalStoragePermission(private var context: Context, private var
                     res == PackageManager.PERMISSION_GRANTED
                 }
 
-                else -> (externalSharedPreferences!!.stringURI!!.isNotEmpty() && DocumentFile.fromTreeUri(context, Uri.parse(externalSharedPreferences!!.stringURI))!!.exists() )
-                        && isSameUri
+                else -> {
+                    isSamePath ||
+                            externalSharedPreferences!!.stringURI!!.isNotEmpty() && DocumentFile.fromTreeUri(context, Uri.parse(externalSharedPreferences!!.stringURI))!!.exists() && isSamePath
+
+                }
             }
 
         }
-    private val isSameUri
-        get()= externalSharedPreferences!!.stringURI!!.isNotEmpty() && sdCardPathSharedPreference!!.stringURI!!.isNotEmpty() &&
-                !externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
+
+    private val isSamePath: Boolean
+        get() = externalSharedPreferences!!.externalPath!!.isNotEmpty() && getExternalPath(context).equals(externalSharedPreferences!!.externalPath)
 
     private fun storageAccessFrameWork() {
         try {
@@ -121,17 +124,19 @@ class AndroidExternalStoragePermission(private var context: Context, private var
     }
 
 
-    fun getExternalPath(): String? {
-            //  Its supports till android 9
-            val splitWord = "Android/data/"
-            val cacheDir = (context.externalCacheDir?.absolutePath)?.split(splitWord)?.toTypedArray()
-        return   cacheDir?.get(0)
-
-    }
-
     init {
         externalSharedPreferences = ExternalPathSharedPreference(context)
         sdCardPathSharedPreference = SdCardPathSharedPreference(context)
+    }
+
+    companion object {
+        fun getExternalPath(context: Context?): String? {
+            //  Its supports till android 9
+            val splitWord = "Android/data/"
+            val cacheDir = (context!!.externalCacheDir?.absolutePath)?.split(splitWord)?.toTypedArray()
+            return cacheDir?.get(0)
+
+        }
     }
 
 
