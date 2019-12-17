@@ -62,12 +62,14 @@ public final class SdCardPath {
 
             Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
 
+            assert mStorageManager != null;
             Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
             Method getUuid = storageVolumeClazz.getMethod("getUuid");
             Method getPath = storageVolumeClazz.getMethod("getPath");
             Method isPrimary = storageVolumeClazz.getMethod("isPrimary");
             Object result = getVolumeList.invoke(mStorageManager);
 
+            assert result != null;
             final int length = Array.getLength(result);
             for (int i = 0; i < length; i++) {
                 Object storageVolumeElement = Array.get(result, i);

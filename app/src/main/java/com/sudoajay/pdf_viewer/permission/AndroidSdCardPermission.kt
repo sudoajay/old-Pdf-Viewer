@@ -63,8 +63,9 @@ class AndroidSdCardPermission {
     val isSdStorageWritable: Boolean
         get() {
             return when {
-                Build.VERSION.SDK_INT <= 22 ->{
-                     File(sdCardPathURL).exists() || isSameUri
+                //             Its supports till android 9 & api 28
+                Build.VERSION.SDK_INT <= 28 -> {
+                    File(sdCardPathSharedPreference!!.sdCardPath).exists() && sdCardPathSharedPreference!!.sdCardPath!! != AndroidExternalStoragePermission.getExternalPath(context)
                 }
                 else -> {
                     ((sdCardPathSharedPreference!!.stringURI!!.isNotEmpty() && Uri.parse(sdCardPathSharedPreference!!.stringURI).isAbsolute
@@ -74,8 +75,7 @@ class AndroidSdCardPermission {
         }
 
     private val isSameUri
-        get() = externalSharedPreferences!!.stringURI!!.isEmpty() && sdCardPathSharedPreference!!.stringURI!!.isEmpty() &&
-                externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
+        get() = externalSharedPreferences!!.stringURI.equals(sdCardPathSharedPreference!!.stringURI)
 
 
     private fun grab() { // gran the data from shared preference

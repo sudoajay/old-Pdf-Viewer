@@ -314,8 +314,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
             sdCardPathURL = SdCardPath.getFullPathFromTreeUri(sdCardURL, this@MainActivity)
             stringURI = sdCardURL.toString()
 
-
-//             Its supports till android 9 & api
+            // Its supports till android 9 & api 28
             if (requestCode == 42) {
                  spiltPart = "%3A"
                 sdCardPathSharedPreference!!.sdCardPath = spiltThePath(stringURI, sdCardPathURL)
@@ -449,15 +448,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
     }
 
     override fun onPointerCaptureChanged(hasCapture: Boolean) {}
-//    private fun countDatabaseItem() {
-//        val size: Int
-//        val cursor = database!!.size
-//        if (cursor != null && cursor.moveToFirst()) {
-//            cursor.moveToFirst()
-//            size = cursor.getString(0).toInt()
-
-//        }
-//    }
 
     private fun clearDataBaseItem() {
         if (!database!!.isEmpty) database!!.deleteData()
@@ -478,7 +468,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
         override fun doInBackground(vararg params: String?): String? {
             //             Its supports till android 9 & api 28
-            if (Build.VERSION.SDK_INT <= 22) {
+            if (Build.VERSION.SDK_INT <= 28) {
                 scanPdf!!.scanFIle(this@MainActivity, AndroidExternalStoragePermission.getExternalPath(applicationContext), androidSdCardPermission!!.getSdCardPathURL())
             } else {
                 scanPdf?.scanFile(this@MainActivity)

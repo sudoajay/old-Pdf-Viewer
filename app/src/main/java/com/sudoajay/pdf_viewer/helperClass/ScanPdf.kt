@@ -48,7 +48,6 @@ class ScanPdf {
             getAllPathDocumentFile(documentFile)
         }
 
-
     }
 
 
@@ -90,11 +89,10 @@ class ScanPdf {
     }
 
     private val isSamePath: Boolean
-        get() = externalSharedPreference!!.externalPath!!.isNotEmpty() && AndroidExternalStoragePermission.getExternalPath(mContext).equals(externalSharedPreference!!.externalPath)
+        get() = AndroidExternalStoragePermission.getExternalPath(mContext).equals(externalSharedPreference!!.externalPath)
 
     private val isSameUri
-        get() = externalSharedPreference!!.stringURI!!.isEmpty() && sdCardSharedPreference!!.stringURI!!.isEmpty() &&
-                externalSharedPreference!!.stringURI.equals(sdCardSharedPreference!!.stringURI)
+        get() =externalSharedPreference!!.stringURI.equals(sdCardSharedPreference!!.stringURI)
 
 
 }

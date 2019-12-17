@@ -50,7 +50,7 @@ class AndroidExternalStoragePermission(private var context: Context, private var
     fun callThread() { // check if permission already given or not
         if (!isExternalStorageWritable) {
 //             Its supports till android 9 & api 28
-            if (Build.VERSION.SDK_INT <= 22) {
+            if (Build.VERSION.SDK_INT <= 28) {
                 val handler = Handler()
                 handler.postDelayed({ callCustomPermissionDialog() }, 500)
             } else {
@@ -90,8 +90,8 @@ class AndroidExternalStoragePermission(private var context: Context, private var
         get() {
             //
             return when {
-//                Its supports till android 9
-                Build.VERSION.SDK_INT <= 22 -> {
+//             Its supports till android 9 & api 28
+                Build.VERSION.SDK_INT <= 28 -> {
                     val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
                     val res = activity?.checkCallingOrSelfPermission(permission)
                     res == PackageManager.PERMISSION_GRANTED
