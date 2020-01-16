@@ -8,6 +8,7 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import com.sudoajay.pdf_viewer.R
 
+
 class ShowWebView : AppCompatActivity() {
     private var myWebView: WebView? = null
     private var getPath: String? = null
@@ -41,5 +42,4 @@ class ShowWebView : AppCompatActivity() {
         settings?.loadWithOverviewMode = true
         myWebView?.webViewClient = WebViewClient()
     }
-
 }

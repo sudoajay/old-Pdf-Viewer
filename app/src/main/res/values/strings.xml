@@ -11,6 +11,8 @@
     <string name="isFirstTimeLaunch">Is First Time Launch</string>
     <string name="MY_PREFS_NAME">@string/app_name</string>
 
+    <!--    Splash Screen Name-->
+    <string name="advance_app_name">Advance Pdf Viewer</string>
 
     <!--Slide Information-->
     <string name="slide_1_title">Support Storage</string>
@@ -43,14 +45,19 @@
     <string name="continue_Button">Continue</string>
 
     <!--custom dialog Permission-->
+    <!--custom dialog Permission-->
     <string name="activity_custom_dialog_permission_TextView1">App Permission</string>
-    <string name="activity_custom_dialog_permission_TextView2">In Android 6+ Apps need permission to read your External storage.</string>
+    <string name="activity_custom_dialog_permission_TextView2">In Android 6+ Apps will ask for
+        permission once you start using them.</string>
+    <string name="readMoreButton">Read More</string>
+    <string name="continueButton">Continue</string>
 
     <!--share app-->
     <string name="share_info">Hey, check This App which helps you to Delete Duplicate and Unnecessary Data from the phone -</string>
 
-    <string name="errorMesSdCard">Only Select the Sd Card Directory</string>
-    <string name="errorMesExternal">Only Select the Internal Card Directory</string>
+    <string name="selectSdCardMes">Only Select the Sd Card Directory</string>
+    <string name="selectExternalMes">Only Select the Internal Card Directory</string>
+    <string name="wrongDirectorySelected">You select the wrong directory</string>
 
     <!--    BottomSheetDialog more option-->
     <string name="option_openFile">Open File</string>
@@ -69,10 +76,10 @@
     <string name="info_CreatedText">Created : </string>
     <string name="open_text">Open</string>
 
-<!--Menu Item-->
+    <!--Menu Item-->
     <string name="search_menuItem">Search</string>
 
-<!--    Option menu-->
+    <!--    Option menu-->
     <string name="sort_optionMenu">Sort</string>
     <string name="sort_date_optionMenu">By Date</string>
     <string name="sort_name_optionMenu">By Name</string>
@@ -84,10 +91,12 @@
     <string name="more_sendFeedback_optionMenu">Send Feedback</string>
     <string name="more_rateUs_optionMenu">Rate Us</string>
     <string name="sort_shareApp_optionMenu">Share App</string>
-    <string name="sort_aboutApp_optionMenu">About App</string>
-    <string name="welcome_slide_3_imageview">Welcome Slide 3 ImageView</string>
+    <string name="sort_moreApp_optionMenu">More App</string>
+    <string name="welcome_slide_3_imageView">Welcome Slide 3 ImageView</string>
     <string name="scan_sd_card_text">Scan Sd Card</string>
     <string name="reportIt">There is Error Please Report It</string>
     <string name="giveUsPermission">Give us permission for further process</string>
+    <string name="supportAboveSdCard">Sorry , We don\'t support sd card at this android version </string>
+    <string name="title_dynamic_feature">Hey Just Click on it</string>
 
 </resources>

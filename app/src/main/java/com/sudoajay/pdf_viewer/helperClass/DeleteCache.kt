@@ -1,35 +1,57 @@
-@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-
 package com.sudoajay.pdf_viewer.helperClass
 
 import android.content.Context
+import android.os.Build
+import androidx.documentfile.provider.DocumentFile
 import java.io.File
 
 internal object DeleteCache {
     fun deleteCache(context: Context) {
         try {
-            val dir = context.cacheDir
-            deleteDir(dir)
+
+            if (Build.VERSION.SDK_INT <= 28) {
+                val dir = context.cacheDir
+                deleteWithFile(dir)
+            } else {
+                val cacheDir = context.cacheDir.absolutePath
+                val documentHelperClass = DocumentHelperClass(context)
+                val documentFile = documentHelperClass.separatePath(cacheDir)
+                deleteWithDoc(documentFile)
+            }
             CustomToast.toastIt(context, "Successfully Cache Data Is Deleted")
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun deleteDir(dir: File?): Boolean {
-        return if (dir != null && dir.isDirectory) {
-            val children = dir.list()
-            for (i in children.indices) {
-                val success = deleteDir(File(dir, children[i]))
-                if (!success) {
-                    return false
+    private fun deleteWithFile(dir: File): Boolean {
+        return when {
+            dir.isDirectory -> {
+                val children = dir.listFiles()
+                for (i in children!!.indices) {
+                    deleteWithFile(children[i])
                 }
+                dir.delete()
             }
-            dir.delete()
-        } else if (dir != null && dir.isFile) {
-            dir.delete()
+            dir.isFile -> {
+                dir.delete()
+            }
+            else -> {
+                return false
+            }
+        }
+    }
+
+    private fun deleteWithDoc(documentFile: DocumentFile) {
+        if (documentFile.isDirectory) {
+            for (file in documentFile.listFiles()) {
+                deleteWithDoc(file)
+            }
+            if (documentFile.listFiles().isEmpty())
+                documentFile.delete()
+
         } else {
-            false
+            documentFile.delete()
         }
     }
 }

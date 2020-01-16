@@ -1,68 +1,75 @@
 package com.sudoajay.pdf_viewer.helperClass
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import androidx.documentfile.provider.DocumentFile
 import com.sudoajay.pdf_viewer.permission.AndroidExternalStoragePermission
+import com.sudoajay.pdf_viewer.permission.AndroidSdCardPermission
 import com.sudoajay.pdf_viewer.sharedPreference.ExternalPathSharedPreference
 import com.sudoajay.pdf_viewer.sharedPreference.SdCardPathSharedPreference
 import java.io.File
 import java.util.*
 
-@Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-class ScanPdf {
+class ScanPdf(private val mContext: Context, activity: Activity) {
     val pdfPath = ArrayList<String>()
-    private var mContext: Context? = null
-    private var externalSharedPreference: ExternalPathSharedPreference? = null
-    private var sdCardSharedPreference: SdCardPathSharedPreference? = null
+
+    private val externalSharedPreference = ExternalPathSharedPreference(mContext)
+    private val sdCardSharedPreference = SdCardPathSharedPreference(mContext)
+    private val androidSdCardPermission = AndroidSdCardPermission(mContext)
+    private val androidExternalStoragePermission = AndroidExternalStoragePermission(mContext, activity)
     private var isAndroidDir: Boolean? = null
     private var parentName: String? = null
-    fun scanFIle(mContext: Context?, externalDir: String?, sdCardDir: String?) {
-        this.mContext = mContext
+
+    fun scanUsingFile() {
+
+        val externalDir = externalSharedPreference.externalPath
+        val sdCardDir = sdCardSharedPreference.sdCardPath
 //      Its supports till android 9 & api 28
-        if (File(externalDir).exists()) {
+        if (androidExternalStoragePermission.isExternalStorageWritable) {
             getAllPathFile(File(externalDir))
         }
-        if (File(sdCardDir).exists()) {
+        if (Build.VERSION.SDK_INT >= 21 && androidSdCardPermission.isSdStorageWritable) {
             getAllPathFile(File(sdCardDir))
         }
     }
-
-    fun scanFile(mContext: Context?) {
-        this.mContext = mContext
-        externalSharedPreference = ExternalPathSharedPreference(mContext!!)
-        sdCardSharedPreference = SdCardPathSharedPreference(mContext)
-        var documentFile: DocumentFile?
-
-        if (isSamePath) {
-            isAndroidDir = false
-            documentFile = DocumentFile.fromTreeUri(mContext, Uri.parse(externalSharedPreference!!.stringURI))
-            parentName = documentFile!!.name
-            getAllPathDocumentFile(documentFile)
-        }
-
-        if (!isSameUri) {
-            isAndroidDir = false
-            documentFile = DocumentFile.fromTreeUri(mContext, Uri.parse(sdCardSharedPreference!!.stringURI))
-            parentName = documentFile!!.name
-            getAllPathDocumentFile(documentFile)
-        }
-
-    }
-
 
     private fun getAllPathFile(directory: File) {
         val extension = ".pdf"
         var getName: String
         try {
-            for (child in directory.listFiles())
+            for (child in directory.listFiles()!!)
                 if (child.isDirectory) getAllPathFile(child)
                 else {
-                getName = child.name
-                if (getName.endsWith(extension)) pdfPath.add(child.absolutePath)
+                    getName = child.name
+                    if (getName.endsWith(extension))
+                        pdfPath.add(child.absolutePath)
                 }
         } catch (ignored: Exception) {
         }
+    }
+
+    fun scanUsingDoc() {
+
+        var documentFile: DocumentFile
+        val externalUri = externalSharedPreference.stringURI
+        val sdCardUri = sdCardSharedPreference.stringURI
+
+        if (androidExternalStoragePermission.isExternalStorageWritable) {
+            isAndroidDir = false
+            documentFile = DocumentFile.fromTreeUri(mContext, Uri.parse(externalUri))!!
+            parentName = documentFile.name
+            getAllPathDocumentFile(documentFile)
+        }
+
+        if (androidSdCardPermission.isSdStorageWritable) {
+            isAndroidDir = false
+            documentFile = DocumentFile.fromTreeUri(mContext, Uri.parse(sdCardUri))!!
+            parentName = documentFile.name
+            getAllPathDocumentFile(documentFile)
+        }
+
     }
 
     private fun getAllPathDocumentFile(directory: DocumentFile) {
@@ -87,12 +94,5 @@ class ScanPdf {
         } catch (ignored: Exception) {
         }
     }
-
-    private val isSamePath: Boolean
-        get() = AndroidExternalStoragePermission.getExternalPath(mContext).equals(externalSharedPreference!!.externalPath)
-
-    private val isSameUri
-        get() =externalSharedPreference!!.stringURI.equals(sdCardSharedPreference!!.stringURI)
-
 
 }

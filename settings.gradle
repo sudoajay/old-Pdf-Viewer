@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':dynamic_feature'
 rootProject.name='Pdf_Viewer'

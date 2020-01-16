@@ -1,4 +1,4 @@
-package com.sudoajay.pdf_viewer.introSceen
+package com.sudoajay.pdf_viewer.introScreen
 
 import android.content.Context
 import android.content.Intent
@@ -24,7 +24,6 @@ import com.sudoajay.pdf_viewer.R
 import com.sudoajay.pdf_viewer.sharedPreference.PrefManager
 import com.sudoajay.pdf_viewer.splashScreen.Splash
 
-@Suppress("DEPRECATION")
 class WelcomeActivity : AppCompatActivity() {
     private var viewPager: ViewPager? = null
     private var dotsLayout: LinearLayout? = null

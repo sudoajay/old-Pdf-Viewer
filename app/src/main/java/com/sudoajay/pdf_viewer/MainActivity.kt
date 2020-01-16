@@ -30,10 +30,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.sudoajay.lodinganimation.LoadingAnimation
 import com.sudoajay.pdf_viewer.customDialog.DialogInformationData
 import com.sudoajay.pdf_viewer.databaseClasses.Database
-import com.sudoajay.pdf_viewer.helperClass.CopyFile
-import com.sudoajay.pdf_viewer.helperClass.CustomToast
-import com.sudoajay.pdf_viewer.helperClass.DeleteCache
-import com.sudoajay.pdf_viewer.helperClass.ScanPdf
+import com.sudoajay.pdf_viewer.helperClass.*
 import com.sudoajay.pdf_viewer.permission.AndroidExternalStoragePermission
 import com.sudoajay.pdf_viewer.permission.AndroidSdCardPermission
 import com.sudoajay.pdf_viewer.recyclerView.MyAdapter
@@ -44,7 +41,7 @@ import com.sudoajay.pdf_viewer.webView.ShowWebView
 import java.io.File
 import java.util.*
 
-@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@SuppressLint("InflateParams", "Recycle")
 class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListener, SearchView.OnQueryTextListener {
     private var androidExternalStoragePermission: AndroidExternalStoragePermission? = null
     private var androidSdCardPermission: AndroidSdCardPermission? = null
@@ -56,7 +53,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
     private var recyclerView: RecyclerView? = null
     private var mOnScrollChangedListener: OnScrollChangedListener? = null
     private val requestCode = 100
-    private var path: String? = null
+    private var filePath: String? = null
     private var mBottomSheetDialog: BottomSheetDialog? = null
     private var bottomSheetDialog1: BottomSheetDialog? = null
     private var loadingAnimation: LoadingAnimation? = null
@@ -79,7 +76,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         if (!androidExternalStoragePermission!!.isExternalStorageWritable) {
             mBottomSheetDialog!!.show()
         } else {
-            MultiThreadingScanning().execute()
+            startScanningThread()
         }
     }
 
@@ -103,7 +100,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         sdCardPathSharedPreference = SdCardPathSharedPreference(applicationContext)
         //         Select Option
         mBottomSheetDialog = BottomSheetDialog(this@MainActivity)
-        @SuppressLint("InflateParams") val sheetView = layoutInflater.inflate(R.layout.layout_dialog_selectoption, null)
+
+        val sheetView = layoutInflater.inflate(R.layout.layout_dialog_selectoption, null)
         mBottomSheetDialog!!.setContentView(sheetView)
         mBottomSheetDialog!!.setCancelable(false)
         val bottomSheetScanFile = sheetView.findViewById<LinearLayout>(R.id.bottomSheet_scanFile)
@@ -112,7 +110,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         bottomSheetSelectFile.setOnClickListener(this)
         //        More Option for file
         bottomSheetDialog1 = BottomSheetDialog(this@MainActivity)
-        @SuppressLint("InflateParams") val sheetView1 = layoutInflater.inflate(R.layout.layout_dialog_moreoption, null)
+        val sheetView1 = layoutInflater.inflate(R.layout.layout_dialog_moreoption, null)
         bottomSheetDialog1!!.setContentView(sheetView1)
         val bottomSheetOpenFile = sheetView1.findViewById<LinearLayout>(R.id.bottomSheet_openFile)
         bottomSheetOpenFile.setOnClickListener(this)
@@ -177,12 +175,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
                 item.isChecked = true
                 mAdapter!!.transferItem(getPdfPath)
             }
-            R.id.refresh_optionMenu -> refreshList()
+            R.id.refresh_optionMenu -> clearDataBaseItem()
             R.id.filePicker_optionMenu -> openFileManager()
             R.id.more_sendFeedback_optionMenu -> openEmail()
             R.id.more_rateUs_optionMenu -> rateUs()
             R.id.sort_shareApp_optionMenu -> shareIt()
-            R.id.sort_aboutApp_optionMenu -> aboutApp()
+            R.id.sort_moreApp_optionMenu -> openMoreApp()
             R.id.clearCache_optionMenu -> DeleteCache.deleteCache(applicationContext)
             else -> return super.onOptionsItemSelected(item)
         }
@@ -197,7 +195,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
                 1 -> database!!.pathFromName
                 2 -> database!!.lastModified
                 else -> {
-                    database!!.getpathFromSize()
+                    database!!.getPathFromSize()
                 }
             }
             if (cursor != null && cursor.moveToFirst()) {
@@ -224,19 +222,19 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         if (view.id == R.id.refresh_imageView) {
             if (refreshImageView != null && refreshImageView!!.rotation % 360 == 0f) {
                 refreshImageView!!.animate().rotationBy(360f).duration = 1000
-                refreshList()
+                startScanningThread()
             }
         }
     }
 
     fun openPdf(position: Int) {
-        this.path = getPdfPath[position]
+        this.filePath = getPdfPath[position]
         // do whatever
-        MultiThreadingCopying().execute()
+        startCopyingThread()
     }
 
     fun openMoreOption(position: Int) { // do whatever
-        this.path = getPdfPath[position]
+        this.filePath = getPdfPath[position]
         bottomSheetDialog1!!.show()
     }
 
@@ -254,10 +252,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         startActivity(i)
     }
 
-    private fun aboutApp() {
-        val appLink = ""
+    private fun openMoreApp() {
+        val link = "https://play.google.com/store/apps/dev?id=5309601131127361849"
         val i = Intent(Intent.ACTION_VIEW)
-        i.data = Uri.parse(appLink)
+        i.data = Uri.parse(link)
         startActivity(i)
     }
 
@@ -272,11 +270,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         }
     }
 
-    private fun refreshList() {
-        clearDataBaseItem()
-        MultiThreadingScanning().execute()
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == 1) { // If request is cancelled, the result arrays are empty.
@@ -288,10 +281,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
                 //                if (!androidExternalStoragePermission.isExternalStorageWritable())
 //                    androidExternalStoragePermission.call_Thread();
             } else {
-                MultiThreadingScanning().execute()
+                val externalPathSharedPreference = ExternalPathSharedPreference(applicationContext)
+                externalPathSharedPreference.externalPath = AndroidExternalStoragePermission.getExternalPath(applicationContext)!!
+                startScanningThread()
             }
-            // other 'case' lines to check for other
-// permissions this app might request
+
         }
     }
 
@@ -304,23 +298,23 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
         if (this.requestCode == requestCode && data != null) {
             fileUri = data.data
-            MultiThreadingCopying().execute()
+            startCopyingThread()
             return
         } else if (requestCode == 42 || requestCode == 58) {
             val sdCardURL: Uri? = data!!.data
             grantUriPermission(this@MainActivity.packageName, sdCardURL, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             this@MainActivity.contentResolver.takePersistableUriPermission(sdCardURL!!, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
+             
             sdCardPathURL = SdCardPath.getFullPathFromTreeUri(sdCardURL, this@MainActivity)
             stringURI = sdCardURL.toString()
 
             // Its supports till android 9 & api 28
             if (requestCode == 42) {
                  spiltPart = "%3A"
-                sdCardPathSharedPreference!!.sdCardPath = spiltThePath(stringURI, sdCardPathURL)
+                sdCardPathSharedPreference!!.sdCardPath = spiltThePath(stringURI, sdCardPathURL.toString())
                 sdCardPathSharedPreference!!.stringURI = spiltUri(stringURI,spiltPart)
                 if (!androidSdCardPermission!!.isSdStorageWritable) {
-                    CustomToast.toastIt(applicationContext, resources.getString(R.string.errorMesSdCard))
+                    CustomToast.toastIt(applicationContext, resources.getString(R.string.wrongDirectorySelected))
                     return
                 }
 
@@ -331,7 +325,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
                     externalSharedPreferences!!.externalPath = realExternalPath
                     externalSharedPreferences!!.stringURI = spiltUri(stringURI,spiltPart)
                 } else {
-                    CustomToast.toastIt(applicationContext, getString(R.string.errorMesExternal))
+                    CustomToast.toastIt(applicationContext, getString(R.string.wrongDirectorySelected))
                     mBottomSheetDialog!!.show()
                     return
                 }
@@ -339,7 +333,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
             }
             // refresh when you get sd card path & External Path
-            refreshList()
+            startScanningThread()
         } else {
             CustomToast.toastIt(applicationContext, getString(R.string.reportIt))
         }
@@ -349,33 +343,33 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         return uri.split(spiltPart)[0] + spiltPart
     }
 
-    private fun spiltThePath(url: String, path: String?): String {
+    private fun spiltThePath(url: String, path: String): String {
         val spilt = url.split("%3A").toTypedArray()
         val getPaths = spilt[0].split("/").toTypedArray()
-        val paths = path!!.split(getPaths[getPaths.size - 1]).toTypedArray()
+        val paths = path.split(getPaths[getPaths.size - 1]).toTypedArray()
         return paths[0] + getPaths[getPaths.size - 1]+"/"
 
     }
 
+    private fun startScanningThread() {
+        MultiThreadingScanning(this@MainActivity).execute()
+    }
+
+    private fun startCopyingThread() {
+        MultiThreadingCopying(this@MainActivity).execute()
+    }
+
     fun sendSdCardPermission() {
-        if (!androidSdCardPermission!!.isSdStorageWritable) androidSdCardPermission!!.callThread()
-
+        if (!androidSdCardPermission!!.isSdStorageWritable)
+            androidSdCardPermission!!.callThread()
     }
 
-    @SuppressLint("Recycle")
-    private fun queryName(resolver: ContentResolver, uri: Uri?): String {
-        val returnCursor = resolver.query(uri!!, null, null, null, null)!!
-        val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        returnCursor.moveToFirst()
-        val name = returnCursor.getString(nameIndex)
-        returnCursor.close()
-        return name
-    }
+
 
     override fun onRefresh() {
         swipeToRefresh!!.isRefreshing = true
         Handler().postDelayed({
-            refreshList()
+            startScanningThread()
             swipeToRefresh!!.isRefreshing = false
         }, 2000)
     }
@@ -383,11 +377,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
     override fun onClick(view: View) {
         when (view.id) {
             R.id.bottomSheet_scanFile -> {
-                if (!androidExternalStoragePermission!!.isExternalStorageWritable) androidExternalStoragePermission!!.callThread()
+                if (!androidExternalStoragePermission!!.isExternalStorageWritable)
+                    androidExternalStoragePermission!!.callThread()
                 mBottomSheetDialog!!.cancel()
             }
             R.id.bottomSheet_selectFile -> openFileManager()
-            R.id.bottomSheet_openFile -> MultiThreadingCopying().execute()
+            R.id.bottomSheet_openFile -> startCopyingThread()
             R.id.bottomSheet_viewFolder -> specificFolder()
             R.id.bottomSheet_moreInfo -> {
                 dialogInformationData()
@@ -406,10 +401,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
     }
 
     private fun specificFolder() {
-        val getPath: String? = if (!path!!.startsWith("content:")) {
-            path?.replace("/" + File(path).name, "")
+        val getPath: String? = if (!filePath!!.startsWith("content:")) {
+            filePath?.replace("/" + File(filePath.toString()).name, "")
         } else {
-            path
+            filePath
         }
         val selectedUri = Uri.parse(getPath)
         val intent = Intent(Intent.ACTION_VIEW)
@@ -428,13 +423,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         val appLinkAction = intent.action
         if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
             fileUri = appLinkData
-            MultiThreadingCopying().execute()
+            startCopyingThread()
         }
     }
 
     private fun dialogInformationData() {
         val ft = supportFragmentManager.beginTransaction()
-        DialogInformationData(path.toString(), this@MainActivity).show(ft, "dialog")
+        DialogInformationData(filePath.toString(), this@MainActivity).show(ft, "dialog")
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
@@ -454,40 +449,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
     }
 
-
-    @SuppressLint("StaticFieldLeak")
-    inner class MultiThreadingScanning : AsyncTask<String?, String?, String?>() {
-        private var scanPdf: ScanPdf? = null
-        override fun onPreExecute() {
-            loadingAnimation!!.start()
-            getPdfPath.clear()
-            // Empty If the database have something
-            if (!database!!.isEmpty) database!!.deleteData()
-            scanPdf = ScanPdf()
-        }
-
-        override fun doInBackground(vararg params: String?): String? {
-            //             Its supports till android 9 & api 28
-            if (Build.VERSION.SDK_INT <= 28) {
-                scanPdf!!.scanFIle(this@MainActivity, AndroidExternalStoragePermission.getExternalPath(applicationContext), androidSdCardPermission!!.getSdCardPathURL())
-            } else {
-                scanPdf?.scanFile(this@MainActivity)
-            }
-            return null
-        }
-
-        override fun onPostExecute(s: String?) {
-            super.onPostExecute(s)
-            loadingAnimation!!.stop()
-            getPdfPath = scanPdf!!.pdfPath
-            val type: Int = if (sortDateOptionMenu == null || sortNameOptionMenu!!.isChecked) 2 else if (sortSizeOptionMenu!!.isChecked) 1 else {
-                3
-            }
-            sortingResult(type)
-            fillItem()
-        }
-    }
-
     public override fun onStart() {
         super.onStart()
         swipeToRefresh!!.viewTreeObserver.addOnScrollChangedListener(OnScrollChangedListener { swipeToRefresh!!.isEnabled = recyclerView!!.scrollY == 0 }.also { mOnScrollChangedListener = it })
@@ -498,38 +459,96 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         super.onStop()
     }
 
-    @SuppressLint("StaticFieldLeak")
-    inner class MultiThreadingCopying : AsyncTask<String?, String?, String?>() {
-        var dst: File? = null
-        override fun onPreExecute() {}
+
+    private class MultiThreadingScanning
+    internal constructor(private val mainActivity: MainActivity) : AsyncTask<String?, String?, String?>() {
+        private var scanPdf: ScanPdf = ScanPdf(mainActivity.applicationContext, mainActivity)
+        override fun onPreExecute() {
+            mainActivity.loadingAnimation!!.start()
+            mainActivity.getPdfPath.clear()
+            // Empty If the database have something
+            mainActivity.clearDataBaseItem()
+        }
+
         override fun doInBackground(vararg params: String?): String? {
-            try {
-                if (path!!.startsWith("content:")) {
-                    fileUri = Uri.parse(path)
-                }
-                if (fileUri == null && path != null) {
-                    val src = File(path)
-                    dst = File(cacheDir.toString() + "/" + src.name)
-                    //                If file exist with same size
-                    if (dst!!.exists()) dst!!.delete()
-                    CopyFile.copy(src, dst)
-                } else {
-                    dst = File(cacheDir.toString() + "/" + queryName(contentResolver, fileUri))
-                    if (dst!!.exists()) dst!!.delete()
-                    CopyFile.copyUri(this@MainActivity, fileUri, dst)
-                }
-            } catch (ignored: Exception) {
+            //             Its supports till android 9 & api 28
+            if (Build.VERSION.SDK_INT <= 28) {
+                scanPdf.scanUsingFile()
+            } else {
+                scanPdf.scanUsingDoc()
             }
             return null
         }
 
         override fun onPostExecute(s: String?) {
             super.onPostExecute(s)
-            if (dst != null) {
-                val intent = Intent(applicationContext, ShowWebView::class.java)
-                intent.action = dst!!.absolutePath
-                startActivity(intent)
+            mainActivity.loadingAnimation!!.stop()
+            mainActivity.getPdfPath = scanPdf.pdfPath
+            var type = 2
+            if (mainActivity.sortNameOptionMenu != null) {
+                type = when {
+                    mainActivity.sortNameOptionMenu?.isChecked!! -> 1
+                    mainActivity.sortSizeOptionMenu?.isChecked!! -> 3
+                    else -> 2
+                }
             }
+            mainActivity.sortingResult(type)
+            mainActivity.fillItem()
+        }
+    }
+
+
+    class MultiThreadingCopying
+    internal constructor(private val mainActivity: MainActivity) : AsyncTask<String?, String?, String?>() {
+        var dst: File? = null
+        override fun onPreExecute() {}
+        override fun doInBackground(vararg params: String?): String? {
+            try {
+                if (!mainActivity.filePath.isNullOrEmpty() && mainActivity.filePath!!.startsWith("content:")) {
+                    mainActivity.fileUri = Uri.parse(mainActivity.filePath)
+                }
+                if (mainActivity.fileUri == null) {
+                    val src = File(mainActivity.filePath.toString())
+                    dst = File(mainActivity.cacheDir.toString() + "/" + src.name)
+                    //                If file exist with same size
+                    if (dst!!.exists()) dst!!.delete()
+                    CopyFile.copy(src, dst!!)
+                } else {
+                    val cache: String = mainActivity.cacheDir.absolutePath
+                    val fileName: String = queryName(mainActivity.contentResolver, mainActivity.fileUri)
+                    dst = File("""$cache/$fileName"""
+                    )
+                    if (Build.VERSION.SDK_INT <= 28) {
+                        if (dst!!.exists()) dst!!.delete()
+                    } else {
+                        val documentHelperClass = DocumentHelperClass(mainActivity.applicationContext)
+                        val documentFile = documentHelperClass.separatePath(cache)
+                        if (documentFile.findFile(fileName)?.exists()!!) documentFile.findFile(fileName)!!.delete()
+                    }
+
+
+                    CopyFile.copyUri(mainActivity, mainActivity.fileUri!!, dst!!)
+                }
+            } catch (ignore: Exception) {
+            }
+            return null
+        }
+
+        override fun onPostExecute(s: String?) {
+            super.onPostExecute(s)
+            val intent = Intent(mainActivity.applicationContext, ShowWebView::class.java)
+            intent.action = dst!!.absolutePath
+            mainActivity.startActivity(intent)
+        }
+
+
+        private fun queryName(resolver: ContentResolver, uri: Uri?): String {
+            val returnCursor = resolver.query(uri!!, null, null, null, null)!!
+            val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            returnCursor.moveToFirst()
+            val name = returnCursor.getString(nameIndex)
+            returnCursor.close()
+            return name
         }
 
     }

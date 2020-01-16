@@ -1,6 +1,5 @@
 package com.sudoajay.pdf_viewer.databaseClasses
 
-import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -36,9 +35,10 @@ class Database(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, nul
     val isEmpty: Boolean
         get() {
             val sqLiteDatabase = this.writableDatabase
-            @SuppressLint("Recycle") val cursor = sqLiteDatabase.rawQuery("select * from $DATABASE_TABLE_NAME", null)
+            val cursor = sqLiteDatabase.rawQuery("select * from $DATABASE_TABLE_NAME", null)
             cursor.moveToFirst()
             val count = cursor.count
+            cursor.close()
             return count <= 0
         }
 
@@ -66,7 +66,7 @@ class Database(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, nul
             return sqLiteDatabase.rawQuery("SELECT path  FROM $DATABASE_TABLE_NAME ORDER BY Name ASC ", null)
         }
 
-    fun getpathFromSize(): Cursor {
+    fun getPathFromSize(): Cursor {
         val sqLiteDatabase = this.writableDatabase
         return sqLiteDatabase.rawQuery("SELECT path  FROM $DATABASE_TABLE_NAME ORDER BY Size DESC ", null)
     }

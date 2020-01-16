@@ -1,6 +1,5 @@
 package com.sudoajay.pdf_viewer.sdCard;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
@@ -14,7 +13,6 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 
-@SuppressLint("NewApi")
 public final class SdCardPath {
 
     private static final String PRIMARY_VOLUME_NAME = "primary";
@@ -47,18 +45,16 @@ public final class SdCardPath {
             return volumePath;
         }
 
-
     }
 
-    @SuppressLint("ObsoleteSdkInt")
-    private static String getVolumePath(final String volumeId, Context concontext) {
+    private static String getVolumePath(final String volumeId, Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return null;
         }
 
         try {
             StorageManager mStorageManager =
-                    (StorageManager) concontext.getSystemService(Context.STORAGE_SERVICE);
+                    (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
 
             Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
 
@@ -117,5 +113,6 @@ public final class SdCardPath {
             return File.separator;
         }
     }
+
 
 }

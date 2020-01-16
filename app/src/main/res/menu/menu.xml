@@ -61,8 +61,8 @@
                 android:id="@+id/sort_shareApp_optionMenu"
                 android:title="@string/sort_shareApp_optionMenu" />
             <item
-                android:id="@+id/sort_aboutApp_optionMenu"
-                android:title="@string/sort_aboutApp_optionMenu" />
+                android:id="@+id/sort_moreApp_optionMenu"
+                android:title="@string/sort_moreApp_optionMenu" />
 
         </menu>
     </item>

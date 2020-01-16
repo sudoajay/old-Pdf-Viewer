@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import com.sudoajay.pdf_viewer.MainActivity
@@ -22,6 +23,7 @@ import com.sudoajay.pdf_viewer.helperClass.FileSize.convertIt
 import com.sudoajay.pdf_viewer.helperClass.FileUtils
 import java.io.File
 import java.text.SimpleDateFormat
+import java.util.*
 
 class DialogInformationData(private val path: String, private val mainActivity: MainActivity) : DialogFragment(), View.OnClickListener {
     private var rootview: View? = null
@@ -33,13 +35,12 @@ class DialogInformationData(private val path: String, private val mainActivity: 
     private var infoExtTextView: TextView? = null
     private var infoCreatedTextView: TextView? = null
     private val activity: Activity
-    @SuppressLint("NewApi")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootview = inflater.inflate(R.layout.layout_dialog_informationdata, container, false)
         reference()
         // setup dialog box
         dialog!!.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        constraintLayout!!.setBackgroundColor(resources.getColor(R.color.tabBackgroundColor, null))
+        constraintLayout!!.setBackgroundColor(ContextCompat.getColor(context!!, R.color.tabBackgroundColor))
         // Fill Dialog Box
         fillIt()
         return rootview
@@ -63,7 +64,7 @@ class DialogInformationData(private val path: String, private val mainActivity: 
 
     @SuppressLint("SetTextI18n")
     private fun fillIt() {
-        @SuppressLint("SimpleDateFormat") val sdf = SimpleDateFormat("d MMM yyyy , h:mm a")
+        val sdf = SimpleDateFormat("d MMM yyyy , h:mm a", Locale.getDefault())
         if (!path.startsWith("content:")) {
             val filePath = File(this.path)
             infoNameTextView!!.text = filePath.name
@@ -83,9 +84,9 @@ class DialogInformationData(private val path: String, private val mainActivity: 
             }
             infoCreatedTextView!!.text = sdf.format(filePath.lastModified())
         } else {
-            val documentFile = DocumentFile.fromSingleUri(mainActivity, Uri.parse(path))
+            val documentFile = DocumentFile.fromSingleUri(context!!, Uri.parse(path))
             infoNameTextView!!.text = documentFile!!.name
-            val exactPath = FileUtils.getPath(context, Uri.parse(path)).replace(documentFile.name!!, "")
+            val exactPath = FileUtils.replaceSdCardPath(context, FileUtils.getPath(context!!, Uri.parse(path)).toString()).replace(documentFile.name!!, "")
             infoLocationTextView!!.text = exactPath
             infoSizeTextView!!.text = convertIt(documentFile.length())
             if (documentFile.isDirectory) {
@@ -136,7 +137,7 @@ class DialogInformationData(private val path: String, private val mainActivity: 
     override fun onClick(v: View) {
         when (v.id) {
             R.id.open_Button -> {
-                mainActivity.MultiThreadingCopying().execute()
+                MainActivity.MultiThreadingCopying(mainActivity).execute()
                 dismiss()
             }
             R.id.cancel_Button, R.id.close_ImageView -> dismiss()

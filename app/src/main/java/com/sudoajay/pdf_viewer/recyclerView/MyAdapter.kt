@@ -55,7 +55,7 @@ class MyAdapter(mainActivity: MainActivity, item: ArrayList<String>) : RecyclerV
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) { // - get element from your dataset at this position
 // - replace the contents of the view with that element
-        @SuppressLint("SimpleDateFormat") val sdf = SimpleDateFormat(" , d MMM yyyy , h:mm a")
+        val sdf = SimpleDateFormat(" , d MMM yyyy , h:mm a", Locale.getDefault())
         if (position < item.size) {
             if (!item[position].startsWith("content:")) {
                 val file = File(item[position])
@@ -106,9 +106,8 @@ class MyAdapter(mainActivity: MainActivity, item: ArrayList<String>) : RecyclerV
     }
 
     private val exampleFilter: Filter = object : Filter() {
-        @SuppressLint("DefaultLocale")
         override fun performFiltering(charSequence: CharSequence): FilterResults {
-            var filterPattern = charSequence.toString().toLowerCase().trim { it <= ' ' }
+            var filterPattern = charSequence.toString().toLowerCase(Locale.getDefault()).trim { it <= ' ' }
             if (charSequence.isEmpty()) {
                 filterPattern = ""
             }
