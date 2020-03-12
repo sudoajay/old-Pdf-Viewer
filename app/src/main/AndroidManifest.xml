@@ -25,7 +25,7 @@
             android:name=".introScreen.WelcomeActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="InnerclassSeparator">
             <intent-filter>
@@ -96,7 +96,7 @@
             tools:ignore="InnerclassSeparator" />
         <activity
             android:name=".splashScreen.Splash"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="InnerclassSeparator" />
 

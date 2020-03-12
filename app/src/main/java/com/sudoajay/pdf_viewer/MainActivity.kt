@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
         // use a linear layout manager
         val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
         recyclerView!!.layoutManager = layoutManager
-        // specify an adapter (see also next example)
+        // specify an adapter (see also next example)b.
 
         mAdapter = MyAdapter(this@MainActivity, ArrayList(getPdfPath))
         recyclerView!!.adapter = mAdapter
@@ -261,7 +261,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, View.OnClickListene
 
     private fun openEmail() {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:" + "sudoajay@gmail.com"))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:" + "devsudoajay@gmail.com"))
             intent.putExtra(Intent.EXTRA_SUBJECT, "")
             intent.putExtra(Intent.EXTRA_TEXT, "")
             startActivity(intent)

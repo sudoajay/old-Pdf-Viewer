@@ -27,7 +27,7 @@ class DocumentHelperClass(private var context: Context) {
         return dugPath(spilt, documentFile)
     }
 
-     fun dugPath(path: String, document: DocumentFile): DocumentFile {
+     private fun dugPath(path: String, document: DocumentFile): DocumentFile {
         var documentFile = document
         val list = path.split("/")
         for (file in list) {

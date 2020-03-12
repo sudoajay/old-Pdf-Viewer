@@ -4,8 +4,6 @@
     <color name="colorPrimaryDark">#a82400</color>
     <color name="colorAccent">#376db6</color>
 
-
-
     <!-- dots inactive colors -->
     <color name="dot_dark_screen1">#2d5e78</color>
     <color name="dot_dark_screen2">#a97d32</color>
